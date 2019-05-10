@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="us-ascii"?>
+
+<marlin>
+  <execute>
+    <processor name="Status"/>
+    <processor name="MergeCollectionsEcalBarrelHits"/>
+    <processor name="MergeCollectionsEcalEndcapHits"/>
+    <processor name="MyEcalBarrelDigi"/>
+    <processor name="MyEcalEndcapDigi"/>
+    <processor name="MyEcalRingDigi"/>
+    <processor name="CPUCrunch"/>
+    <processor name="MyHcalBarrelDigi"/>
+    <processor name="MyHcalEndcapDigi"/>
+    <processor name="MyHcalRingDigi"/>
+  </execute>
+  
+  <constants>
+    <constant name="lcgeo_DIR" value="/path/to/lcgeo" />
+    <constant name="DetectorModel" value="ILD_l5_v02" />
+    <constant name="CompactFile" value="${lcgeo_DIR}/ILD/compact/${DetectorModel}/${DetectorModel}.xml" />
+    <!-- Some calibration constant from ILDConfig -->
+    <constant name="EcalBarrelMip">0.0001525</constant>
+    <constant name="EcalEndcapMip">0.0001525</constant>
+    <constant name="EcalRingMip">0.0001525</constant>
+    <constant name="HcalBarrelMip">0.0004925</constant>
+    <constant name="HcalEndcapMip">0.0004775</constant>
+    <constant name="HcalRingMip">0.0004875</constant>
+    <constant name="EcalBarrelEnergyFactors">0.00616736103247 0.0125274552256</constant>
+    <constant name="EcalEndcapEnergyFactors">0.0064868449976 0.0131764071919</constant>
+    <constant name="EcalRingEnergyFactors">0.0064868449976 0.0131764071919</constant>
+    <constant name="HcalBarrelEnergyFactors">0.0216747245411</constant>
+    <constant name="HcalEndcapEnergyFactors">0.0217395864899</constant>
+    <constant name="HcalRingEnergyFactors">0.0271318181372</constant>
+    
+    <constant name="InputFileDirectory" value="/home/eteremi/afs" />
+  </constants>
+
+  <global>
+    <parameter name="Verbosity"> MESSAGE </parameter>
+    <parameter name="Concurrency"> 10 </parameter>
+    <parameter name="ColoredConsole"> 0 </parameter>
+    <!-- <parameter name="LogFileName"> toto.log </parameter> -->
+  </global>
+
+  <datasource type="LCIO">
+    <parameter name="LCIOInputFiles">
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_000.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_100.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_200.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_300.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_400.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_500.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_600.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_700.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_800.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_900.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_01_000.slcio
+    </parameter>
+    <parameter name="MaxRecordNumber" value="5"/>
+    <parameter name="SkipNEvents" value="0"/>
+  </datasource>
+
+  <geometry type="DD4hepGeometry">
+    <parameter name="CompactFile"> ${CompactFile} </parameter>
+    <parameter name="DumpGeometry"> false </parameter>
+  </geometry>
+
+  <processor name="Status" type="Statusmonitor" clone="false">
+    <parameter name="Verbosity"> MESSAGE </parameter>
+  </processor>
+  
+  <processor name="CPUCrunch" type="CPUCrunching" clone="true">
+    <parameter name="CrunchTime"> 500 </parameter>
+  </processor>
+  
+  <!-- The next processors configuration is a copy past from ILDConfig calo digi config  -->
+  
+  <!-- Merge collection odd/even of ECal hits in case of ecal hybrid model simulation -->
+  <!-- Does nothing in case the input collections do not exist (in case of ecal non-hybrid simulations) -->
+  <processor name="MergeCollectionsEcalBarrelHits" type="MergeCollections">
+    <parameter name="InputCollections" type="StringVec"> ECalBarrelSiHitsEven ECalBarrelSiHitsOdd </parameter>
+    <parameter name="OutputCollection" type="string"> EcalBarrelCollection </parameter>
+  </processor>
+
+  <processor name="MergeCollectionsEcalEndcapHits" type="MergeCollections">
+    <parameter name="InputCollections" type="StringVec"> ECalEndcapSiHitsEven ECalEndcapSiHitsOdd </parameter>
+    <parameter name="OutputCollection" type="string"> EcalEndcapsCollection </parameter>
+  </processor>
+
+  <!--### the Ecal barrel ###-->
+  <!--digitisation -->
+  <processor name="MyEcalBarrelDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalBarrelCollection </parameter>
+    <parameter name="outputHitCollections"> EcalBarrelCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalBarrelRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalBarrelMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Ecal endcaps ###-->
+  <!-- digitisation -->
+  <processor name="MyEcalEndcapDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapsCollection </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapsCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalEndcapMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!--### the Ecal endcap rings ###-->
+  <!-- digitisation -->
+  <processor name="MyEcalRingDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapRingCollection </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapRingCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalRingMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  
+  <!--### the Hcal barrel ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalBarrelDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalBarrelRegCollection </parameter>
+    <parameter name="outputHitCollections"> HcalBarrelCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalBarrelRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalBarrelMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Hcal endcaps ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalEndcapDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapsCollection </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapsCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalEndcapMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Hcal ring ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalRingDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapRingCollection </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapRingCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalRingMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+
+</marlin>
