@@ -95,10 +95,11 @@ namespace marlinreco_mt {
     
     /**
      *  @brief  Digitize the detector energy
-     *  
+     *
+     *  @param  gen the random number generator to use
      *  @param  energy the input energy
      */
-    virtual float digitiseDetectorEnergy( float energy ) const = 0 ;
+    virtual float digitiseDetectorEnergy( RandomGenerator &gen, float energy ) const = 0 ;
     
     /**
      *  @brief  Convert the input energy with the specified scale

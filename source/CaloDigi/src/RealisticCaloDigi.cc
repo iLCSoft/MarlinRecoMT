@@ -12,6 +12,7 @@
 #include <EVENT/LCParameters.h>
 #include <UTIL/CellIDDecoder.h>
 
+// -- marlinrecomt headers
 #include <MarlinRecoMT/CalorimeterHitType.h>
 
 // -- std headers
@@ -303,7 +304,7 @@ namespace marlinreco_mt {
     // returns energy ( in units determined by the overloaded digitiseDetectorEnergy )
 
     // this is an overloaded method, provides energy in technology-dependent units
-    float e_out = digitiseDetectorEnergy( energy ) ;
+    float e_out = digitiseDetectorEnergy( evtdata._generator, energy ) ;
     // the following make only relative changes to the energy
     std::normal_distribution<float> miscalDistUncorrel( 1.0, _misCalib_uncorrel );
     // random miscalib, uncorrelated in cells
