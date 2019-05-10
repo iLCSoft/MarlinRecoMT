@@ -130,10 +130,10 @@ namespace marlinreco_mt {
     // usually a good idea to
     printParameters() ;
     // check that number of input and output collections names are the same
-    if( _outputCollections.size() == _inputCollections.size() ) {
+    if( _outputCollections.size() != _inputCollections.size() ) {
       marlin::ProcessorApi::abort( this, "Input/output collection list sizes are different" ) ;
     }
-    if( _outputRelCollections.size() == _inputCollections.size() ) {
+    if( _outputRelCollections.size() != _inputCollections.size() ) {
       marlin::ProcessorApi::abort( this, "Input/output collection list sizes are different" ) ;
     }
     // unit in which threshold is specified
@@ -184,6 +184,10 @@ namespace marlinreco_mt {
         UTIL::CellIDDecoder<EVENT::SimCalorimeterHit> idDecoder( col );
         const auto numElements = col->getNumberOfElements();
         log<marlin::DEBUG1>() << colName << " number of elements = " << numElements << std::endl ;
+        // don't go further if no hits
+        if ( numElements==0 ) {
+          continue ;
+        }
         // create new collection: hits
         IMPL::LCCollectionVec *newcol = new IMPL::LCCollectionVec( EVENT::LCIO::CALORIMETERHIT );
         newcol->setFlag(_flag.getFlag()) ;
@@ -192,15 +196,6 @@ namespace marlinreco_mt {
         relcol->setFlag(_flag_rel.getFlag());
         relcol->parameters().setValue( RELATIONFROMTYPESTR , EVENT::LCIO::CALORIMETERHIT ) ;
         relcol->parameters().setValue( RELATIONTOTYPESTR   , EVENT::LCIO::SIMCALORIMETERHIT ) ;
-        // add collection to event
-        newcol->parameters().setValue( EVENT::LCIO::CellIDEncoding, initString );
-        evt->addCollection( newcol, _outputCollections[i] );
-        // add relation collection to event
-        evt->addCollection( relcol, _outputRelCollections[i] );
-        // don't go further if no hits
-        if ( numElements==0 ) {
-          continue ;
-        }
         // loop over input hits
         for ( int j=0 ; j<numElements ; ++j ) {
           EVENT::SimCalorimeterHit * simhit = dynamic_cast<EVENT::SimCalorimeterHit*>( col->getElementAt( j ) ) ;
@@ -239,11 +234,17 @@ namespace marlinreco_mt {
             } // threshold
           } // time sliced hits
         } // input hits
+        // add collection to event
+        newcol->parameters().setValue( EVENT::LCIO::CellIDEncoding, initString );
+        evt->addCollection( newcol, _outputCollections[i] );
+        // add relation collection to event
+        evt->addCollection( relcol, _outputRelCollections[i] );
       } 
       catch(EVENT::DataNotAvailableException &e) {
         log<marlin::DEBUG1>() << "Could not find input collection " << colName << std::endl;
       }
     }
+    log<marlin::MESSAGE>() << "End of event " << evt->getEventNumber() << std::endl ;
   }
 
   //--------------------------------------------------------------------------
