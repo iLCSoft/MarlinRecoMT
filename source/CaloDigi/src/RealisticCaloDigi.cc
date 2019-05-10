@@ -96,11 +96,6 @@ namespace marlinreco_mt {
                                _misCalib_uncorrel,
                                (float)0.0);
 
-    registerProcessorParameter("miscalibration_uncorrel_memorise" ,
-                               "store oncorrelated miscalbrations in memory? (i.e. use same miscalibrations in each event. WARNING: can take a lot of memory if used...) " ,
-                               _misCalib_uncorrel_keep,
-                               (bool)false);
-
     registerProcessorParameter("miscalibration_correl" ,
                                "correlated random gaussian miscalibration (as a fraction: 1.0 = 100%) " ,
                                _misCalib_correl,
@@ -110,11 +105,6 @@ namespace marlinreco_mt {
                                "random dead cell fraction (as a fraction: 0->1) " ,
                                _deadCell_fraction,
                                (float)0.);
-
-    registerProcessorParameter("deadCell_memorise" ,
-                               "store dead cells in memory? (i.e. use same dead cells in each event. WARNING: can take a lot of memory if used...) " ,
-                               _deadCell_keep,
-                               (bool)false);
 
     // simple model of electronics properties
     registerProcessorParameter("elec_noise_mip",

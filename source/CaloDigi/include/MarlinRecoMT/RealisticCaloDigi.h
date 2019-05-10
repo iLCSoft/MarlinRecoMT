@@ -133,14 +133,10 @@ namespace marlinreco_mt {
     float _calib_mip {} ;              
     ///< general miscalibration (uncorrelated between channels)
     float _misCalib_uncorrel {} ;       
-    ///< if true, use the same cell miscalibs over events (requires more memory)
-    bool  _misCalib_uncorrel_keep {} ;  
     ///< general miscalibration (100% uncorrelated between channels)
     float _misCalib_correl {} ;           
     ///< fraction of random dead channels
-    float _deadCell_fraction {} ;       
-    ///< keep same cells dead between events? (requires more memory)
-    bool  _deadCell_keep {} ;           
+    float _deadCell_fraction {} ;                  
     ///< electronics noise (as fraction of MIP)
     float _elec_noiseMip {} ;
     ///< electronics dynamic range (in terms of MIPs)
@@ -152,11 +148,6 @@ namespace marlinreco_mt {
     EnergyScale _threshold_iunit {} ;
     IMPL::LCFlagImpl _flag {} ;
     IMPL::LCFlagImpl _flag_rel {} ;
-    
-    
-    float _event_correl_miscalib {} ;
-    std::map < std::pair <int, int> , float > _cell_miscalibs {} ;
-    std::map < std::pair <int, int> , bool  > _cell_dead {} ;
   };
   
 }
