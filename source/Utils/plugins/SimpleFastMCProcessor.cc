@@ -165,6 +165,8 @@ namespace marlinreco_mt {
         _initNeutralHadronRes ,
         hadronResDefault ,
         hadronResDefault.size() ) ;
+    
+    forceRuntimeOption( Processor::RuntimeOption::Clone, true ) ;
   }
 
   //--------------------------------------------------------------------------
