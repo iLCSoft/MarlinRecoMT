@@ -8,7 +8,6 @@
     <processor name="MyEcalBarrelDigi"/>
     <processor name="MyEcalEndcapDigi"/>
     <processor name="MyEcalRingDigi"/>
-    <processor name="CPUCrunch"/>
     <processor name="MyHcalBarrelDigi"/>
     <processor name="MyHcalEndcapDigi"/>
     <processor name="MyHcalRingDigi"/>
@@ -67,10 +66,6 @@
 
   <processor name="Status" type="Statusmonitor" clone="false">
     <parameter name="Verbosity"> MESSAGE </parameter>
-  </processor>
-  
-  <processor name="CPUCrunch" type="CPUCrunching" clone="true">
-    <parameter name="CrunchTime"> 500 </parameter>
   </processor>
   
   <!-- The next processors configuration is a copy past from ILDConfig calo digi config  -->
