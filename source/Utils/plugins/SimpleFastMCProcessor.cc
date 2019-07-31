@@ -14,6 +14,7 @@
 #include <IMPL/LCCollectionVec.h>
 #include <EVENT/ReconstructedParticle.h>
 #include <UTIL/LCRelationNavigator.h>
+#include <EVENT/LCIO.h>
 
 namespace marlinreco_mt {
 
@@ -165,7 +166,7 @@ namespace marlinreco_mt {
         _initNeutralHadronRes ,
         hadronResDefault ,
         hadronResDefault.size() ) ;
-    
+
     forceRuntimeOption( Processor::RuntimeOption::Clone, true ) ;
   }
 
