@@ -9,13 +9,13 @@
 
 namespace marlinreco_mt {
 
-  /** Helper processor that merges several input collections into a transient subset collections. 
+  /** Helper processor that merges several input collections into a transient subset collections.
    *  The names and optionally the IDs of the merged collections
    *  are stored in collection parameters MergedCollectionNames and MergedCollectionIDs.
    *
    * @param InputCollections    Name of the input collections
-   * @param InputCollectionIDs  Optional IDs for input collections - if given, IDs will be added to all objects in merged collections as ext<CollID>()" 
-   *                            - it is the users responsibility to ensure uniqueness of the IDs across the event ( and that ID != 0 ) 
+   * @param InputCollectionIDs  Optional IDs for input collections - if given, IDs will be added to all objects in merged collections as ext<CollID>()"
+   *                            - it is the users responsibility to ensure uniqueness of the IDs across the event ( and that ID != 0 )
    * @param OutputCollection    Name of the output collection
    *
    * @author R. Ete, DESY
@@ -25,55 +25,55 @@ namespace marlinreco_mt {
   class MergeCollections : public marlin::Processor {
    public:
     marlin::Processor*  newProcessor() { return new MergeCollections ; }
-    
+
     /**
      *  @brief  Constructor
      */
     MergeCollections() ;
-    
+
     /** Called at the begin of the job before anything is read.
      * Use to initialize the processor, e.g. book histograms.
      */
     void init() ;
-    
+
     /** Called for every event - the working horse.
      */
-    void processEvent( EVENT::LCEvent * evt ) ; 
-    
+    void processEvent( EVENT::LCEvent * evt ) ;
+
   private:
     ///< Helper function to get collection safely
     EVENT::LCCollection* getCollection( EVENT::LCEvent* evt, const std::string name ) const ;
-    
+
   protected:
     // processor parameters
     std::vector<std::string>   _inColNames  {} ;
     std::vector<int>           _inColIDs    {} ;
-    std::string                _outColName  {} ; 
+    std::string                _outColName  {} ;
     int                        _collectionParameterIndex  {} ;
   };
 
   //--------------------------------------------------------------------------
 
-  MergeCollections::MergeCollections() : 
+  MergeCollections::MergeCollections() :
     Processor("MergeCollections") {
     // modify processor description
     _description = "MergeCollections creates a transient subset collection that merges all input collections " ;
 
     std::vector<std::string> colNames ;
-    registerProcessorParameter( "InputCollections" , 
+    registerProcessorParameter( "InputCollections" ,
   			      "Names of all input collections" ,
   			      _inColNames ,
   			      colNames
   			      );
 
     std::vector<int> colIDs ;
-    registerProcessorParameter( "InputCollectionIDs" , 
+    registerProcessorParameter( "InputCollectionIDs" ,
   			      "IDs for input collections - if given id will be added to all objects in merged collections as ext<CollID)" ,
   			      _inColIDs ,
   			      colIDs
   			      );
 
-    registerProcessorParameter( "OutputCollection" , 
+    registerProcessorParameter( "OutputCollection" ,
   			      "Name of output collection" ,
   			      _outColName ,
   			      std::string("MergedCollection")
@@ -86,15 +86,15 @@ namespace marlinreco_mt {
   }
 
   //--------------------------------------------------------------------------
-  
+
   void MergeCollections::init() {
     // usually a good idea to
     printParameters() ;
   }
-  
+
   //--------------------------------------------------------------------------
 
-  void MergeCollections::processEvent( EVENT::LCEvent * evt ) { 
+  void MergeCollections::processEvent( EVENT::LCEvent * evt ) {
     std::vector<std::string> colNamesPresent;
     std::vector<int> colIDsPresent;
     std::vector<int> colNElements;
@@ -106,7 +106,7 @@ namespace marlinreco_mt {
     std::size_t nColID = _inColIDs.size() ;
 
     if( marlin::ProcessorApi::isFirstEvent( evt ) && nColID != nCol ) {
-      log<marlin::WARNING>() << " MergeCollections::processEvent : incompatible parameter vector sizes : InputCollections: " << nCol 
+      log<marlin::WARNING>() << " MergeCollections::processEvent : incompatible parameter vector sizes : InputCollections: " << nCol
                              << " <->  InputCollectionIDs " << nColID << std::endl;
       log<marlin::WARNING>() << " MergeCollections::processEvent : standard numbering (0,1,2,...) used." << std::endl;
     }
@@ -131,7 +131,7 @@ namespace marlinreco_mt {
       }
     }
 
-    //--- now loop over collections 
+    //--- now loop over collections
     IMPL::LCCollectionVec* outCol = 0 ;
     bool first = true ;
 
@@ -210,22 +210,21 @@ namespace marlinreco_mt {
       evt->addCollection( outCol, _outColName   ) ;
     }
   }
-  
+
   //--------------------------------------------------------------------------
-  
+
   EVENT::LCCollection* MergeCollections::getCollection( EVENT::LCEvent* evt, const std::string name ) const {
     if( name.size() == 0 )
       return 0 ;
     try {
       return evt->getCollection( name ) ;
     }
-    catch( lcio::DataNotAvailableException& e ) {
+    catch( EVENT::DataNotAvailableException& e ) {
       log<marlin::DEBUG2>() << "getCollection :  DataNotAvailableException : " << name <<  std::endl ;
       return 0 ;
     }
   }
-  
+
   // processor declaration
   MergeCollections aMergeCollections ;
 }
-
