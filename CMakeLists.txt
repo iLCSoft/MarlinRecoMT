@@ -57,6 +57,7 @@ ENDMACRO()
 
 ADD_MARLINRECOMT_PKG( Utils )
 ADD_MARLINRECOMT_PKG( CaloDigi )
+ADD_MARLINRECOMT_PKG( Overlay )
 ADD_MARLINRECOMT_PKG( TrackDigi )
 
 # create library
