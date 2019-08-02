@@ -1,4 +1,9 @@
 #include <MarlinRecoMT/OverlayMerging.h>
+#include <MarlinRecoMT/LCIOHelper.h>
+
+// -- marlin headers
+#include <marlin/Logging.h>
+using namespace marlin::loglevel ;
 
 // -- std headers
 #include <string>
@@ -8,6 +13,7 @@
 #include <EVENT/LCEvent.h>
 #include <EVENT/LCIO.h>
 #include <EVENT/LCCollection.h>
+#include <IMPL/LCCollectionVec.h>
 #include <IMPL/MCParticleImpl.h>
 #include <IMPL/SimCalorimeterHitImpl.h>
 #include <Exceptions.h>
@@ -21,7 +27,30 @@ namespace marlinreco_mt {
   //--------------------------------------------------------------------------
 
   void OverlayMerging::merge( const EVENT::LCEvent *src, EVENT::LCEvent *dst, const CollectionMap &mergeMap ) {
-
+    for( auto iter : mergeMap ) {
+      EVENT::LCCollection *srcCollection = nullptr ;
+      EVENT::LCCollection *dstCollection = nullptr ;
+      // get the source collection
+      try {
+        srcCollection = src->getCollection( iter.first ) ;
+      } 
+      catch ( EVENT::DataNotAvailableException&) {
+        continue ;
+      }
+      // get or create the destination collection
+      try {
+        dstCollection = dst->getCollection( iter.second ) ;
+      } 
+      catch ( EVENT::DataNotAvailableException&) {
+        streamlog_out( DEBUG ) << "destination collection " << iter.second  << " was created." << std::endl ; 
+        dstCollection = new IMPL::LCCollectionVec( srcCollection->getTypeName() ) ;
+        // merge collection parameters
+        LCIOHelper::mergeLCParameters( srcCollection->getParameters(), dstCollection->parameters() ) ;
+        dst->addCollection( dstCollection, iter.second ) ;
+      }
+      dstCollection->setFlag( srcCollection->getFlag() ) ;
+      OverlayMerging::mergeCollections( srcCollection, dstCollection ) ;
+    }
   }
 
   //--------------------------------------------------------------------------
