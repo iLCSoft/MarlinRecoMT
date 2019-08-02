@@ -16,6 +16,7 @@ using namespace marlin::loglevel ;
 #include <IMPL/LCCollectionVec.h>
 #include <IMPL/MCParticleImpl.h>
 #include <IMPL/SimCalorimeterHitImpl.h>
+#include <IMPL/CalorimeterHitImpl.h>
 #include <Exceptions.h>
 
 namespace marlinreco_mt {
@@ -67,6 +68,9 @@ namespace marlinreco_mt {
     else if( dstType == EVENT::LCIO::SIMCALORIMETERHIT ) {
       OverlayMerging::mergeSimCalorimeterHitCollections( src, dst ) ;
     }
+    else if( dstType == EVENT::LCIO::CALORIMETERHIT ) {
+      OverlayMerging::mergeCalorimeterHitCollections( src, dst ) ;
+    }
     else {
       OverlayMerging::mergeAnyCollections( src, dst ) ;
     }
@@ -114,6 +118,34 @@ namespace marlinreco_mt {
           findIter->second->addMCParticleContribution( srcHit->getParticleCont(j), srcHit->getEnergyCont(j), srcHit->getTimeCont(j), srcHit->getPDGCont(j));
         }
         delete srcHit;
+      }
+      src->removeElementAt( i ) ;
+    }
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  void OverlayMerging::mergeCalorimeterHitCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) {
+    int neltsSrc = src->getNumberOfElements();
+    int neltsDst = dst->getNumberOfElements();
+    // create a map of dest Collection
+    std::map<long long, IMPL::CalorimeterHitImpl*> dstMap {} ;
+    for ( int i=0 ; i<neltsDst ; i++ ) {
+      auto dstHit = dynamic_cast<IMPL::CalorimeterHitImpl*> ( dst->getElementAt(i) );
+      dstMap.insert( std::pair<long long, IMPL::CalorimeterHitImpl*>(
+        cellIDToLong( dstHit->getCellID0(), dstHit->getCellID1()),
+        dstHit )
+      ) ;
+    }
+    // process the src collection and merge with dest
+    for ( int i=neltsSrc-1 ; i>=0 ; i-- ) {
+      auto srcHit = dynamic_cast<IMPL::CalorimeterHitImpl*> ( src->getElementAt(i) ) ;
+      auto findIter = dstMap.find( cellIDToLong( srcHit->getCellID0(), srcHit->getCellID1() ) ) ;
+      if ( findIter == dstMap.end() ) {
+        dst->addElement( srcHit ) ;
+      }
+      else {
+        findIter->second->setEnergy( findIter->second->getEnergy() + srcHit->getEnergy() );
       }
       src->removeElementAt( i ) ;
     }

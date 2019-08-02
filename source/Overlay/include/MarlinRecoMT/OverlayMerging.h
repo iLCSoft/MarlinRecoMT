@@ -26,6 +26,8 @@ namespace marlinreco_mt {
     static void mergeMCParticleCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) ;
 
     static void mergeSimCalorimeterHitCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) ;
+    
+    static void mergeCalorimeterHitCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) ;
 
     static void mergeAnyCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) ;
 
