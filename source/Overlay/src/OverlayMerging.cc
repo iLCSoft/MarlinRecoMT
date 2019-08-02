@@ -6,6 +6,7 @@
 using namespace marlin::loglevel ;
 
 // -- std headers
+#include <algorithm>
 #include <string>
 #include <map>
 
@@ -27,7 +28,19 @@ namespace marlinreco_mt {
 
   //--------------------------------------------------------------------------
 
-  void OverlayMerging::merge( const EVENT::LCEvent *src, EVENT::LCEvent *dst, const CollectionMap &mergeMap ) {
+  void OverlayMerging::mergeEvents( const EVENT::LCEvent *src, EVENT::LCEvent *dst ) {
+    std::vector<std::string> srcColNames = *src->getCollectionNames() ;
+    std::vector<std::string> dstColNames = *dst->getCollectionNames() ;
+    for ( auto colname : srcColNames ) {
+      if ( dstColNames.end() != std::find(dstColNames.begin(), dstColNames.end(), colname) ) {
+        OverlayMerging::mergeCollections( src->getCollection( colname ), dst->getCollection( colname ) ) ;
+      }
+    }
+  }
+  
+  //--------------------------------------------------------------------------
+
+  void OverlayMerging::mergeEvents( const EVENT::LCEvent *src, EVENT::LCEvent *dst, const CollectionMap &mergeMap ) {
     for( auto iter : mergeMap ) {
       EVENT::LCCollection *srcCollection = nullptr ;
       EVENT::LCCollection *dstCollection = nullptr ;

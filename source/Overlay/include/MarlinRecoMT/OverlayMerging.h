@@ -19,7 +19,9 @@ namespace marlinreco_mt {
 
   public:
 
-    static void merge( const EVENT::LCEvent *src, EVENT::LCEvent *dst, const CollectionMap &mergeMap ) ;
+    static void mergeEvents( const EVENT::LCEvent *src, EVENT::LCEvent *dst ) ;
+
+    static void mergeEvents( const EVENT::LCEvent *src, EVENT::LCEvent *dst, const CollectionMap &mergeMap ) ;
 
     static void mergeCollections( EVENT::LCCollection* src, EVENT::LCCollection* dst ) ;
 
