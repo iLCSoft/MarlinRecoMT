@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="us-ascii"?>
+
+<marlin>
+  <execute>
+    <processor name="Status"/>
+    <processor name="OneOverlay"/>
+    <processor name="RandomOverlay"/>
+  </execute>
+  
+  <constants>
+    <constant name="InputFileDirectory" value="/home/eteremi/afs" />
+    <constant name="OverlayFileDirectory" value="/home/eteremi/afs" />
+  </constants>
+
+  <global>
+    <parameter name="Verbosity"> MESSAGE </parameter>
+    <parameter name="Concurrency"> 4 </parameter>
+    <parameter name="ColoredConsole"> 0 </parameter>
+    <!-- <parameter name="LogFileName"> toto.log </parameter> -->
+  </global>
+
+  <datasource type="LCIO">
+    <parameter name="LCIOInputFiles">
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_000.slcio
+    </parameter>
+    <parameter name="MaxRecordNumber" value="5"/>
+    <parameter name="SkipNEvents" value="0"/>
+  </datasource>
+
+  <geometry type="EmptyGeometry" />
+
+  <processor name="Status" type="Statusmonitor" clone="false">
+    <parameter name="Verbosity"> MESSAGE </parameter>
+  </processor>
+    
+  <!-- Overlay all available collections. Always overlay exactly one event  -->
+  <processor name="OneOverlay" type="Overlay">
+    <parameter name="InputFileNames" type="StringVec"> ${OverlayFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_300.slcio </parameter>
+    <parameter name="NumberOverlayEvents" type="int"> 1 </parameter>
+  </processor>
+  
+  <!-- Overlay only MCParticle collections. Overlay 2 event + n random event according to poisson law  -->
+  <processor name="RandomOverlay" type="Overlay">
+    <parameter name="InputFileNames" type="StringVec"> ${OverlayFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_200.slcio </parameter>
+    <parameter name="NumberOverlayEvents" type="int"> 1 </parameter>
+    <parameter name="CollectionMap" type="StringVec"> MCParticle MCParticle </parameter>
+    <parameter name="expBG" type="double"> 1.5 </parameter>
+  </processor>
+
+</marlin>
