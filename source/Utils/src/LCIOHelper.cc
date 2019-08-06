@@ -31,5 +31,20 @@ namespace marlinreco_mt {
   	  dst.setValues( key , vals ) ;
   	}
   }
+  
+  //--------------------------------------------------------------------------
+  
+  long long LCIOHelper::cellIDToLong( int cellID0, int cellID1 ) {
+    return ((long long) cellID0 << 32) | cellID1 ;
+  }
+  
+  //--------------------------------------------------------------------------
+    
+  std::pair<int, int> LCIOHelper::longToCellID( long long l ) {
+    std::pair<int, int> vals ;
+    vals.first   = (int)((l & 0xFFFFFFFF00000000LL) >> 32) ;
+    vals.second  = (int) (l & 0xFFFFFFFFLL) ;
+    return vals ;
+  }
 
 }

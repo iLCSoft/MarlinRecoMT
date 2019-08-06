@@ -22,12 +22,6 @@ using namespace marlin::loglevel ;
 
 namespace marlinreco_mt {
 
-  inline long long cellIDToLong( int cellID0, int cellID1 ) {
-    return ((long long) cellID0 << 32) | cellID1 ;
-  }
-
-  //--------------------------------------------------------------------------
-
   void OverlayMerging::mergeEvents( const EVENT::LCEvent *src, EVENT::LCEvent *dst ) {
     std::vector<std::string> srcColNames = *src->getCollectionNames() ;
     std::vector<std::string> dstColNames = *dst->getCollectionNames() ;
@@ -114,14 +108,14 @@ namespace marlinreco_mt {
     for ( int i=0 ; i<neltsDst ; i++ ) {
       auto dstHit = dynamic_cast<IMPL::SimCalorimeterHitImpl*> ( dst->getElementAt(i) );
       dstMap.insert( std::pair<long long, IMPL::SimCalorimeterHitImpl*>(
-        cellIDToLong( dstHit->getCellID0(), dstHit->getCellID1()),
+        LCIOHelper::cellIDToLong( dstHit->getCellID0(), dstHit->getCellID1()),
         dstHit )
       ) ;
     }
     // process the src collection and merge with dest
     for ( int i=neltsSrc-1 ; i>=0 ; i-- ) {
       auto srcHit = dynamic_cast<IMPL::SimCalorimeterHitImpl*> ( src->getElementAt(i) ) ;
-      auto findIter = dstMap.find( cellIDToLong( srcHit->getCellID0(), srcHit->getCellID1() ) ) ;
+      auto findIter = dstMap.find( LCIOHelper::cellIDToLong( srcHit->getCellID0(), srcHit->getCellID1() ) ) ;
       if ( findIter == dstMap.end() ) {
         dst->addElement( srcHit ) ;
       }
@@ -146,14 +140,14 @@ namespace marlinreco_mt {
     for ( int i=0 ; i<neltsDst ; i++ ) {
       auto dstHit = dynamic_cast<IMPL::CalorimeterHitImpl*> ( dst->getElementAt(i) );
       dstMap.insert( std::pair<long long, IMPL::CalorimeterHitImpl*>(
-        cellIDToLong( dstHit->getCellID0(), dstHit->getCellID1()),
+        LCIOHelper::cellIDToLong( dstHit->getCellID0(), dstHit->getCellID1()),
         dstHit )
       ) ;
     }
     // process the src collection and merge with dest
     for ( int i=neltsSrc-1 ; i>=0 ; i-- ) {
       auto srcHit = dynamic_cast<IMPL::CalorimeterHitImpl*> ( src->getElementAt(i) ) ;
-      auto findIter = dstMap.find( cellIDToLong( srcHit->getCellID0(), srcHit->getCellID1() ) ) ;
+      auto findIter = dstMap.find( LCIOHelper::cellIDToLong( srcHit->getCellID0(), srcHit->getCellID1() ) ) ;
       if ( findIter == dstMap.end() ) {
         dst->addElement( srcHit ) ;
       }
