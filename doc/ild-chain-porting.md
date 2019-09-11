@@ -1,0 +1,69 @@
+
+
+ILD processor chain porting:
+
+- [x] MyAIDAProcessor: Not needed anymore
+- [x] InitDD4hep: Geometry plugin in Marlin
+- [x] MyStatusmonitor
+- [x] BgOverlayWW
+- [x] BgOverlayWB
+- [x] BgOverlayBW
+- [x] BgOverlayBB
+- [x] PairBgOverlay
+- [x] MySplitCollectionByLayer
+- [x] VXDPlanarDigiProcessor_CMOSVXD5
+- [x] SITPlanarDigiProcessor
+- [x] FTDPixelPlanarDigiProcessor
+- [x] FTDStripPlanarDigiProcessor
+- [x] FTDDDSpacePointBuilder
+- [x] SETPlanarDigiProcessor
+- [x] SETDDSpacePointBuilder
+- [ ] MyTPCDigiProcessor
+- [ ] MyClupatraProcessor
+- [ ] MySiliconTracking_MarlinTrk
+- [ ] MyForwardTracking
+- [ ] MyTrackSubsetProcessor
+- [ ] MyFullLDCTracking_MarlinTrk
+- [ ] MyCompute_dEdxProcessor
+- [ ] MyV0Finder
+- [ ] MyKinkFinder
+- [x] MergeCollectionsEcalBarrelHits
+- [x] MergeCollectionsEcalEndcapHits
+- [x] MyEcalBarrelDigi
+- [x] MyEcalBarrelReco
+- [ ] MyEcalBarrelGapFiller
+- [x] MyEcalEndcapDigi
+- [x] MyEcalEndcapReco
+- [ ] MyEcalEndcapGapFiller
+- [x] MyEcalRingDigi
+- [x] MyEcalRingReco
+- [x] MyHcalBarrelDigi
+- [x] MyHcalBarrelReco
+- [x] MyHcalEndcapDigi
+- [x] MyHcalEndcapReco
+- [x] MyHcalRingDigi
+- [x] MyHcalRingReco
+- [ ] MySimpleBCalDigi
+- [ ] MySimpleLCalDigi
+- [ ] MySimpleLHCalDigi
+- [ ] MyDDSimpleMuonDigi
+- [ ] MyDDMarlinPandora
+- [ ] BeamCalReco
+- [ ] MyAdd4MomCovMatrixCharged
+- [ ] MyAddClusterProperties
+- [ ] MyComputeShowerShapesProcessor
+- [ ] MyPi0Finder
+- [ ] MyEtaFinder
+- [ ] MyEtaPrimeFinder
+- [ ] MyGammaGammaSolutionFinder
+- [ ] MyDistilledPFOCreator
+- [ ] MyLikelihoodPID
+- [ ] MyRecoMCTruthLinker
+- [ ] VertexFinder
+- [ ] TOFEstimators0ps
+- [ ] TOFEstimators10ps
+- [ ] TOFEstimators50ps
+- [ ] MyLCIOOutputProcessor
+- [ ] DSTOutput
+- [ ] MyPfoAnalysis
+
