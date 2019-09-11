@@ -130,21 +130,16 @@ namespace marlinreco_mt {
 
         for ( int j=0 ; j<numElements ; ++j ) {
           auto hit = static_cast<EVENT::CalorimeterHit*>( collection->getElementAt( j ) ) ;
-        	int cellid0 = hit->getCellID0() ;
-        	int cellid1 = hit->getCellID1() ;
-
-        	auto newhit = new IMPL::CalorimeterHitImpl(); // make new hit
-        	float energy = this->reconstructEnergy( hit ) ; // overloaded method, technology dependent
-
-        	newhit->setCellID0( cellid0 ) ;
-        	newhit->setCellID1( cellid1 ) ;
-        	newhit->setEnergy( energy ) ;
+          // make new hit
+        	auto newhit = new IMPL::CalorimeterHitImpl(); 
+        	newhit->setCellID0( hit->getCellID0() ) ;
+        	newhit->setCellID1( hit->getCellID1() ) ;
+        	newhit->setEnergy( this->reconstructEnergy( cellIDDecoder, hit ) ) ; // overloaded method, technology dependent
         	newhit->setRawHit( hit->getRawHit() ) ;
         	newhit->setTime( hit->getTime() ) ;
         	newhit->setPosition( hit->getPosition() ) ;
         	newhit->setType( hit->getType() ) ;
         	outputCollection->addElement( newhit ) ;
-
         	// get the simcalohit corresponding to this digitised hit
           auto relatedObjects = navigator.getRelatedToObjects( hit ) ;
         	if ( not relatedObjects.empty() ) {

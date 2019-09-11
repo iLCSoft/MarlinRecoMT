@@ -7,6 +7,7 @@
 // -- lcio headers
 #include <EVENT/CalorimeterHit.h>
 #include <EVENT/LCEvent.h>
+#include <UTIL/CellIDDecoder.h>
 
 #include <string>
 #include <vector>
@@ -39,8 +40,8 @@ namespace marlinreco_mt {
 
    protected:
     float getLayerCalib( int ilayer ) const ;
-    
-    virtual float reconstructEnergy( const EVENT::CalorimeterHit *hit ) const = 0 ;  // to be overloaded, technology-specific
+    // to be overloaded, technology-specific
+    virtual float reconstructEnergy( UTIL::CellIDDecoder<EVENT::CalorimeterHit> &decoder, const EVENT::CalorimeterHit *hit ) const = 0 ;
 
     // processor parameters
     std::vector <std::string>        _inputCollections {} ;
