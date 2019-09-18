@@ -11,6 +11,9 @@
     <processor name="MyHcalBarrelDigi"/>
     <processor name="MyHcalEndcapDigi"/>
     <processor name="MyHcalRingDigi"/>
+    <processor name="MyBCalDigi"/>
+    <processor name="MyLCalDigi"/>
+    <processor name="MyLHCalDigi"/>
   </execute>
   
   <constants>
@@ -44,16 +47,6 @@
   <datasource type="LCIO">
     <parameter name="LCIOInputFiles">
       ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_000.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_100.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_200.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_300.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_400.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_500.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_600.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_700.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_800.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_900.slcio
-      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_01_000.slcio
     </parameter>
     <parameter name="MaxRecordNumber" value="5"/>
     <parameter name="SkipNEvents" value="0"/>
@@ -170,6 +163,78 @@
     <parameter name="ppd_npix_uncert"> 0 </parameter>
     <parameter name="ppd_pix_spread"> 0 </parameter>
     <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!-- BeamCal digitizer -->
+  <processor name="MyBCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> BeamCalCollection </parameter>
+    <parameter name="OutputCollection"> BCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationBCalHit </parameter>
+    <parameter name="EnergyThreshold"> 5e-05 </parameter>
+    <parameter name="CalibrCoeff"> 79.6 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> BeamCal </parameter>
+    <parameter name="CaloID"> bcal </parameter>
+    <parameter name="CaloType"> em </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- LCal digitizer -->
+  <processor name="MyLCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> LumiCalCollection </parameter>
+    <parameter name="OutputCollection"> LCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationLcalHit </parameter>
+    <parameter name="EnergyThreshold"> 0.4e-04 </parameter>
+    <parameter name="CalibrCoeff"> 89.0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> Lcal </parameter>
+    <parameter name="CaloID"> lcal </parameter>
+    <parameter name="CaloType"> em </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- LHCal digitizer -->
+  <processor name="MyLHCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> LHCalCollection </parameter>
+    <parameter name="OutputCollection"> LHCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationLHcalHit </parameter>
+    <parameter name="EnergyThreshold"> 1.7e-04 </parameter>
+    <parameter name="CalibrCoeff"> 150 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> LHCal </parameter>
+    <parameter name="CaloID"> lhcal </parameter>
+    <parameter name="CaloType"> had </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- Muon chamber barrel digitizer -->
+  <processor name="MyYokeBarrelDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> YokeBarrelCollection </parameter>
+    <parameter name="OutputCollection"> MUONBarrel </parameter>
+    <parameter name="RelationOutputCollection"> RelationMuonBarrelHit </parameter>
+    <parameter name="EnergyThreshold"> 1.76e-08 </parameter>
+    <parameter name="MaxHitEnergy"> 2.0 </parameter>
+    <parameter name="CalibrCoeff"> 56.7 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> YokeBarrel </parameter>
+    <parameter name="CaloID"> yoke </parameter>
+    <parameter name="CaloType"> muon </parameter>
+    <parameter name="CaloLayout"> barrel </parameter>
+  </processor>
+
+  <!-- Muon chamber endcap digitizer -->  
+  <processor name="MyYokeEndcapDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> YokeEndcapsCollection </parameter>
+    <parameter name="OutputCollection"> MUONEndcap </parameter>
+    <parameter name="RelationOutputCollection"> RelationMuonEndcapHit </parameter>
+    <parameter name="EnergyThreshold"> 1.76e-08 </parameter>
+    <parameter name="MaxHitEnergy"> 2.0 </parameter>
+    <parameter name="CalibrCoeff"> 56.7 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> YokeEndcap </parameter>
+    <parameter name="CaloID"> yoke </parameter>
+    <parameter name="CaloType"> muon </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
   </processor>
 
 </marlin>
