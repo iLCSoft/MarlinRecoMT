@@ -1,6 +1,6 @@
 
 
-ILD processor chain porting:
+# ILD processor chain porting:
 
 - [x] MyAIDAProcessor: Not needed anymore
 - [x] InitDD4hep: Geometry plugin in Marlin
@@ -43,10 +43,10 @@ ILD processor chain porting:
 - [x] MyHcalEndcapReco
 - [x] MyHcalRingDigi
 - [x] MyHcalRingReco
-- [ ] MySimpleBCalDigi
-- [ ] MySimpleLCalDigi
-- [ ] MySimpleLHCalDigi
-- [ ] MyDDSimpleMuonDigi
+- [x] MySimpleBCalDigi
+- [x] MySimpleLCalDigi
+- [x] MySimpleLHCalDigi
+- [x] MyDDSimpleMuonDigi
 - [ ] MyDDMarlinPandora
 - [ ] BeamCalReco
 - [ ] MyAdd4MomCovMatrixCharged
@@ -66,4 +66,3 @@ ILD processor chain porting:
 - [ ] MyLCIOOutputProcessor
 - [ ] DSTOutput
 - [ ] MyPfoAnalysis
-
