@@ -61,9 +61,12 @@ namespace marlinreco_mt {
     void processEvent( EVENT::LCEvent * evt ) ;
 
   protected:
-    // processor parameters
-    std::string                               _inputCollectionName {} ;
-    EVENT::StringVec                          _collectionsAndLayers {} ;
+    marlin::Property<std::string> _inputCollectionName {this, "InputCollection" , 
+             "Name of the input collection with hits", "FTDCollection" } ;
+
+    marlin::Property<std::vector<std::string>> _collectionsAndLayers {this, "OutputCollections" , 
+             "Name of the output collection with start and end layer number" , { "FTD_PIXELCollection", "0", "1", "FTD_STRIPCollection", "2", "6" } } ;
+    
     std::vector<OutputCollectionInfo>         _outputCollections {} ;
   };
 
@@ -73,18 +76,6 @@ namespace marlinreco_mt {
     Processor("SplitCollectionByLayer") {
     // modify processor description
     _description = "split a hit collection based on the layer number of the hits " ;
-
-    registerProcessorParameter("InputCollection" , 
-  			     "Name of the input collection with hits"  ,
-  			     _inputCollectionName ,
-  			     std::string("FTDCollection")
-  			     );
-
-    registerProcessorParameter("OutputCollections" , 
-    		     "Name of the output collection with start and end layer number"  ,
-    		     _collectionsAndLayers ,
-    		     EVENT::StringVec { "FTD_PIXELCollection", "0", "1", "FTD_STRIPCollection", "2", "6" }
-    		     );
   }
 
   //--------------------------------------------------------------------------
@@ -94,17 +85,17 @@ namespace marlinreco_mt {
     printParameters() ;
     
     // chekck consistency
-    if( 0 != _collectionsAndLayers.size() % 3 ) {
+    if( 0 != _collectionsAndLayers.get().size() % 3 ) {
       marlin::ProcessorApi::abort( this, "The OutputCollections parameter length should be a multiple of 3 (CollectionName layer0 layer1)." ) ;
     }
-    std::size_t len = _collectionsAndLayers.size() % 3 ;
+    std::size_t len = _collectionsAndLayers.get().size() % 3 ;
     _outputCollections.resize( len ) ;
     
     std::size_t index = 0 ;
     for( std::size_t i=0 ; i<len ; i++ ) {
-      _outputCollections[i]._name        = _collectionsAndLayers[ index ] ; index ++ ;
-      _outputCollections[i]._layerStart  = std::atoi( _collectionsAndLayers[ index ].c_str() ) ; index ++ ;
-      _outputCollections[i]._layerEnd    = std::atoi( _collectionsAndLayers[ index ].c_str() ) ; index ++ ;
+      _outputCollections[i]._name        = _collectionsAndLayers.get()[ index ] ; index ++ ;
+      _outputCollections[i]._layerStart  = std::atoi( _collectionsAndLayers.get()[ index ].c_str() ) ; index ++ ;
+      _outputCollections[i]._layerEnd    = std::atoi( _collectionsAndLayers.get()[ index ].c_str() ) ; index ++ ;
     }
   }
 
@@ -116,7 +107,7 @@ namespace marlinreco_mt {
       collection =  evt->getCollection( _inputCollectionName )  ; 
     } 
     catch( EVENT::DataNotAvailableException& ) {
-      log<DEBUG5>() <<  " input collection not in event : " << _inputCollectionName << "   - nothing to do    !!! " << std::endl ;  
+      log<DEBUG5>() <<  " input collection not in event : " << _inputCollectionName.get() << "   - nothing to do    !!! " << std::endl ;  
       return ;
     }
     // cellID converter function

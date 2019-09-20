@@ -81,20 +81,27 @@ namespace marlinreco_mt {
     void processEvent( EVENT::LCEvent * evt ) ;
 
   private:
-    ///< Input MC collection name
-    std::string              _inputCollectionName{};
-    ///< Reco particle output collection name
-    std::string              _recoParticleCollectionName {} ;
-    ///< Reco -> MC relation output collection name
-    std::string              _mcTruthCollectionName {} ;
-    ///< Momentum cut in GeV
-    float                    _momentumCut {0.0} ;
-    ///< Resolutions of charged particles
-    EVENT::FloatVec          _initChargedRes {} ;
-    ///< Resolutions of photons
-    EVENT::FloatVec          _initPhotonRes {} ;
-    ///< Resolutions of photons
-    EVENT::FloatVec          _initNeutralHadronRes {} ;
+    marlin::InputCollectionProperty _inputCollectionName {this, EVENT::LCIO::MCPARTICLE, "InputCollectionName" ,
+           "Name of the MCParticle input collection", "MCParticle" } ;
+
+    marlin::OutputCollectionProperty _recoParticleCollectionName {this, EVENT::LCIO::RECONSTRUCTEDPARTICLE, "RecoParticleCollectionName" ,
+           "Name of the ReconstructedParticles output collection", "ReconstructedParticles" } ;
+
+    marlin::OutputCollectionProperty _mcTruthCollectionName {this, EVENT::LCIO::LCRELATION, "MCTruthMappingCollectionName" ,
+           "Name of the MCTruthMapping output collection", "MCTruthMapping" } ;
+
+    marlin::Property<float> _momentumCut {this, "MomentumCut" ,
+           "No reconstructed particles are produced for smaller momenta (in [GeV])", 0.001 } ;
+
+    marlin::Property<std::vector<float>> _initChargedRes {this, "ChargedResolution" ,
+        "Resolution of charged particles in polar angle range:  d(1/P)  th_min  th_max", { 5e-5, 0.0, 3.141593/2.} } ;
+
+    marlin::Property<std::vector<float>> _initPhotonRes {this, "PhotonResolution" ,
+        "Resolution dE/E=A+B/sqrt(E/GeV) of photons in polar angle range: A  B th_min  th_max", {0.01, 0.1, 0., 3.141593/2.} } ;
+
+    marlin::Property<std::vector<float>> _initNeutralHadronRes {this, "NeutralHadronResolution" ,
+        "Resolution dE/E=A+B/sqrt(E/GeV) of neutral hadrons in polar angle range: A  B th_min  th_max", {0.04, 0.5, 0., 3.141593/2.} } ;
+    
     ///< The particle factory
     IRecoParticleFactory    *_factory {nullptr} ;
   };
@@ -108,64 +115,6 @@ namespace marlinreco_mt {
     // modify processor description
     _description = "SimpleFastMCProcessor creates ReconstrcutedParticles from MCParticles "
       "according to the resolution given in the steering file." ;
-
-    registerInputCollection( EVENT::LCIO::MCPARTICLE,
-           "InputCollectionName" ,
-           "Name of the MCParticle input collection"  ,
-           _inputCollectionName ,
-           std::string("MCParticle") ) ;
-
-    registerOutputCollection( EVENT::LCIO::RECONSTRUCTEDPARTICLE,
-           "RecoParticleCollectionName" ,
-           "Name of the ReconstructedParticles output collection"  ,
-           _recoParticleCollectionName ,
-           std::string("ReconstructedParticles") ) ;
-
-    registerOutputCollection( EVENT::LCIO::LCRELATION,
-           "MCTruthMappingCollectionName" ,
-           "Name of the MCTruthMapping output collection"  ,
-           _mcTruthCollectionName ,
-           std::string("MCTruthMapping") ) ;
-
-    registerProcessorParameter( "MomentumCut" ,
-        "No reconstructed particles are produced for smaller momenta (in [GeV])"  ,
-        _momentumCut ,
-        float( 0.001 ) ) ;
-
-    EVENT::FloatVec chResDefault ;
-    chResDefault.push_back( 5e-5 ) ;
-    chResDefault.push_back( 0.00 ) ;
-    chResDefault.push_back( 3.141593/2. ) ;
-
-    registerProcessorParameter( "ChargedResolution" ,
-        "Resolution of charged particles in polar angle range:  d(1/P)  th_min  th_max"  ,
-        _initChargedRes ,
-        chResDefault ,
-        chResDefault.size() ) ;
-
-    EVENT::FloatVec gammaResDefault ;
-    gammaResDefault.push_back( 0.01 ) ;
-    gammaResDefault.push_back( 0.10 ) ;
-    gammaResDefault.push_back( 0.00 ) ;
-    gammaResDefault.push_back( 3.141593/2. ) ;
-
-    registerProcessorParameter( "PhotonResolution" ,
-        "Resolution dE/E=A+B/sqrt(E/GeV) of photons in polar angle range: A  B th_min  th_max"  ,
-        _initPhotonRes ,
-        gammaResDefault ,
-        gammaResDefault.size() ) ;
-
-    EVENT::FloatVec hadronResDefault ;
-    hadronResDefault.push_back( 0.04 ) ;
-    hadronResDefault.push_back( 0.50 ) ;
-    hadronResDefault.push_back( 0.00 ) ;
-    hadronResDefault.push_back( 3.141593/2. ) ;
-
-    registerProcessorParameter( "NeutralHadronResolution" ,
-        "Resolution dE/E=A+B/sqrt(E/GeV) of neutral hadrons in polar angle range: A  B th_min  th_max"  ,
-        _initNeutralHadronRes ,
-        hadronResDefault ,
-        hadronResDefault.size() ) ;
 
     forceRuntimeOption( Processor::RuntimeOption::Clone, true ) ;
   }

@@ -45,11 +45,17 @@ namespace marlinreco_mt {
     EVENT::LCCollection* getCollection( EVENT::LCEvent* evt, const std::string name ) const ;
 
   protected:
-    // processor parameters
-    std::vector<std::string>   _inColNames  {} ;
-    std::vector<int>           _inColIDs    {} ;
-    std::string                _outColName  {} ;
-    int                        _collectionParameterIndex  {} ;
+    marlin::Property<std::vector<std::string>> _inColNames {this, "InputCollections" ,
+              "Names of all input collections" } ;
+
+    marlin::Property<std::vector<int>> _inColIDs {this, "InputCollectionIDs" ,
+              "IDs for input collections - if given id will be added to all objects in merged collections as ext<CollID)" } ;
+
+    marlin::OutputCollectionProperty _outColName  {this, "OutputCollection" ,
+              "Name of output collection", "MergedCollection" } ;
+
+    marlin::Property<int> _collectionParameterIndex {this, "CollectionParameterIndex",
+              "Index of input collection  that is used to copy the  collection parameters from " , 0 } ;
   };
 
   //--------------------------------------------------------------------------
@@ -58,31 +64,6 @@ namespace marlinreco_mt {
     Processor("MergeCollections") {
     // modify processor description
     _description = "MergeCollections creates a transient subset collection that merges all input collections " ;
-
-    std::vector<std::string> colNames ;
-    registerProcessorParameter( "InputCollections" ,
-  			      "Names of all input collections" ,
-  			      _inColNames ,
-  			      colNames
-  			      );
-
-    std::vector<int> colIDs ;
-    registerProcessorParameter( "InputCollectionIDs" ,
-  			      "IDs for input collections - if given id will be added to all objects in merged collections as ext<CollID)" ,
-  			      _inColIDs ,
-  			      colIDs
-  			      );
-
-    registerProcessorParameter( "OutputCollection" ,
-  			      "Name of output collection" ,
-  			      _outColName ,
-  			      std::string("MergedCollection")
-  			      );
-
-    registerProcessorParameter( "CollectionParameterIndex",
-  			      "Index of input collection  that is used to copy the  collection parameters from " ,
-  			      _collectionParameterIndex ,
-  			      int(0));
   }
 
   //--------------------------------------------------------------------------
@@ -102,8 +83,8 @@ namespace marlinreco_mt {
     std::vector<int> colNFloatParam;
     std::vector<int> colNStringParam;
 
-    std::size_t nCol = _inColNames.size() ;
-    std::size_t nColID = _inColIDs.size() ;
+    std::size_t nCol = _inColNames.get().size() ;
+    std::size_t nColID = _inColIDs.get().size() ;
 
     if( marlin::ProcessorApi::isFirstEvent( evt ) && nColID != nCol ) {
       log<marlin::WARNING>() << " MergeCollections::processEvent : incompatible parameter vector sizes : InputCollections: " << nCol
@@ -115,19 +96,19 @@ namespace marlinreco_mt {
     std::vector<EVENT::LCCollection*> colVec( nCol ) ;
 
     for( std::size_t i=0 ; i<nCol ; ++i ) {
-      EVENT::LCCollection *col = getCollection( evt , _inColNames[i] ) ;
+      EVENT::LCCollection *col = getCollection( evt , _inColNames.get()[i] ) ;
       if( col != 0 ) {
         colVec[i] = col  ;
-        colNamesPresent.push_back(_inColNames[i]);
+        colNamesPresent.push_back(_inColNames.get()[i]);
         if( nColID == nCol ) {
-          colIDsPresent.push_back(_inColIDs[i]);
+          colIDsPresent.push_back(_inColIDs.get()[i]);
         }
         else {
           colIDsPresent.push_back(i) ;
         }
       }
       else {
-        log<marlin::DEBUG2>() << " input collection missing : " << _inColNames[i] << std::endl ;
+        log<marlin::DEBUG2>() << " input collection missing : " << _inColNames.get()[i] << std::endl ;
       }
     }
 
@@ -161,7 +142,7 @@ namespace marlinreco_mt {
       for(int i=0; i< nIntParameters ; i++ ){
         std::vector<int> intVec ;
         col->getParameters().getIntVals(  intKeys[i], intVec ) ;
-        const std::string newIntKey = _inColNames[k]+"_"+intKeys[i];
+        const std::string newIntKey = _inColNames.get()[k]+"_"+intKeys[i];
         outCol->parameters().setValues(newIntKey,intVec);
         intParams++;
         if( unsigned(_collectionParameterIndex) == k )
@@ -173,7 +154,7 @@ namespace marlinreco_mt {
       for(int i=0; i< nFloatParameters ; i++ ){
         std::vector<float> floatVec ;
         col->getParameters().getFloatVals(  floatKeys[i], floatVec ) ;
-        const std::string newFloatKey = _inColNames[k]+"_"+floatKeys[i];
+        const std::string newFloatKey = _inColNames.get()[k]+"_"+floatKeys[i];
         outCol->parameters().setValues(newFloatKey,floatVec);
         floatParams++;
         if( unsigned(_collectionParameterIndex) == k )
@@ -185,7 +166,7 @@ namespace marlinreco_mt {
       for(int i=0; i< nStringParameters ; i++ ){
         std::vector<std::string> stringVec ;
         col->getParameters().getStringVals(  stringKeys[i], stringVec ) ;
-        const std::string newStringKey = _inColNames[k]+"_"+stringKeys[i];
+        const std::string newStringKey = _inColNames.get()[k]+"_"+stringKeys[i];
         outCol->parameters().setValues(newStringKey,stringVec);
         stringParams++;
         if( unsigned(_collectionParameterIndex) == k )
