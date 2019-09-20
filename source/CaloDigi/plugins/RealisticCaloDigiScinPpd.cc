@@ -27,10 +27,17 @@ namespace marlinreco_mt {
     float convertEnergy( float energy, RealisticCaloDigi::EnergyScale inputUnit ) const ;
 
   private:
-    float _PPD_pe_per_mip {};         // # photoelectrons/MIP for PPD
-    int   _PPD_n_pixels {};           // # pixels in PPD
-    float _misCalibNpix {};           // miscalibration of # PPD pixels
-    float _pixSpread {};              // relative spread of PPD pixel signal
+    marlin::Property<float> _PPD_pe_per_mip {this, "ppd_mipPe" ,
+                               "# Photo-electrons per MIP (scintillator): used to poisson smear #PEs if >0" , 10. } ;
+
+    marlin::Property<int> _PPD_n_pixels {this, "ppd_npix" ,
+                               "total number of MPPC/SiPM pixels for implementation of saturation effect" , 10000 } ;
+
+    marlin::Property<float> _misCalibNpix {this, "ppd_npix_uncert" ,
+                               "fractional uncertainty of effective total number of MPPC/SiPM pixels" , 0.05 } ;
+
+    marlin::Property<float> _pixSpread {this, "ppd_pix_spread",
+                               "variation of PPD pixel signal (as a fraction: 0.01=1%)", 0.05 } ;
   };
 
   //--------------------------------------------------------------------------
@@ -39,26 +46,6 @@ namespace marlinreco_mt {
   RealisticCaloDigiScinPpd::RealisticCaloDigiScinPpd() : 
     RealisticCaloDigi( "RealisticCaloDigiScinPpd" ) {
     _description = "Performs digitization of sim calo hits..." ;
-
-    registerProcessorParameter("ppd_mipPe" ,
-                               "# Photo-electrons per MIP (scintillator): used to poisson smear #PEs if >0" ,
-                               _PPD_pe_per_mip,
-                               (float)10.);
-
-    registerProcessorParameter("ppd_npix" ,
-                               "total number of MPPC/SiPM pixels for implementation of saturation effect" ,
-                               _PPD_n_pixels,
-                               (int)10000);
-
-    registerProcessorParameter("ppd_npix_uncert" ,
-                               "fractional uncertainty of effective total number of MPPC/SiPM pixels" ,
-                               _misCalibNpix,
-                               float (0.05) );
-
-    registerProcessorParameter("ppd_pix_spread",
-                               "variation of PPD pixel signal (as a fraction: 0.01=1%)",
-                               _pixSpread,
-                               float (0.05));
   }
   
   //--------------------------------------------------------------------------

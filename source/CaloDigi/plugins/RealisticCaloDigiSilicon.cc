@@ -27,7 +27,8 @@ namespace marlinreco_mt {
     float convertEnergy( float energy, RealisticCaloDigi::EnergyScale inputUnit ) const ;
     
   private:
-    float _ehEnergy {} ;        // energy to create e-h pair in silicon
+    marlin::Property<float> _ehEnergy {this, "silicon_pairEnergy",
+                               "energy required to create e-h pair in silicon (in eV)", 3.6 } ;
   };
 
   //--------------------------------------------------------------------------
@@ -36,10 +37,6 @@ namespace marlinreco_mt {
   RealisticCaloDigiSilicon::RealisticCaloDigiSilicon() : 
     RealisticCaloDigi("RealisticCaloDigiSilicon") {
     _description = "Digitization of silicon simcalo hits" ;
-    registerProcessorParameter("silicon_pairEnergy" ,
-                               "energy required to create e-h pair in silicon (in eV)" ,
-                               _ehEnergy,
-                               (float)3.6);
   }
   
   //--------------------------------------------------------------------------

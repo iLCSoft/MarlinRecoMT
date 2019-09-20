@@ -43,15 +43,29 @@ namespace marlinreco_mt {
     // to be overloaded, technology-specific
     virtual float reconstructEnergy( UTIL::CellIDDecoder<EVENT::CalorimeterHit> &decoder, const EVENT::CalorimeterHit *hit ) const = 0 ;
 
-    // processor parameters
-    std::vector <std::string>        _inputCollections {} ;
-    std::vector <std::string>        _inputRelationCollections {} ;
-    std::vector <std::string>        _outputCollections {} ;
-    std::vector <std::string>        _outputRelationCollections {} ;
-    std::vector <float>              _calibrationCoefficients {} ;
-    std::vector <int>                _calibrationLayers {} ;
-    std::string                      _cellIDLayerString {} ;
-  } ;
+
+  protected:
+    marlin::InputCollectionsProperty _inputCollections {this, EVENT::LCIO::CALORIMETERHIT, "inputHitCollections",
+                              "input hit collection names" } ;
+
+    marlin::InputCollectionsProperty _inputRelationCollections {this, EVENT::LCIO::LCRELATION, "inputRelationCollections",
+                              "input relation collection names (digi<->sim), one per inputHitCollection" } ;
+
+    marlin::Property<std::vector<std::string>> _outputCollections{this, "outputHitCollections",
+                              "output hit collection names" } ;
+
+    marlin::Property<std::vector<std::string>> _outputRelationCollections {this, "outputRelationCollections",
+                              "output hit collection names" } ;
+
+    marlin::Property<std::vector<float>> _calibrationLayers {this, "calibration_layergroups" ,
+                               "grouping of calo layers" } ;
+
+    marlin::Property<std::vector<float>> _calibrationCoefficients {this, "calibration_factorsMipGev" ,
+                               "Calibration coefficients (MIP->shower GeV) of layers groups" } ;
+
+    marlin::Property<std::string> _cellIDLayerString {this, "CellIDLayerString" ,
+                               "name of the part of the cellID that holds the layer", "K-1" } ;
+  };
   
 }
 

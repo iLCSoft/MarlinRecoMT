@@ -28,70 +28,20 @@ using namespace marlin::loglevel ;
 
 namespace marlinreco_mt {
 
-  RealisticCaloReco::RealisticCaloReco( const std::string &pname ) : marlin::Processor( pname ) {
-
+  RealisticCaloReco::RealisticCaloReco( const std::string &pname ) : 
+    marlin::Processor( pname ) {
     _description = "Performs simple reconstruction of calo hits..." ;
-
-    registerInputCollections( EVENT::LCIO::CALORIMETERHIT,
-  			    "inputHitCollections",
-  			    "input hit collection names",
-  			    _inputCollections,
-  			    _inputCollections ) ;
-
-    registerInputCollections( EVENT::LCIO::LCRELATION,
-  			    "inputRelationCollections",
-  			    "input relation collection names (digi<->sim), one per inputHitCollection",
-  			    _inputRelationCollections,
-  			    _inputRelationCollections ) ;
-
-    // output collection names
-    registerProcessorParameter( "outputHitCollections",
-  			      "output hit collection names",
-  			      _outputCollections,
-  			      _outputCollections ) ;
-
-    registerProcessorParameter( "outputRelationCollections",
-  			      "output hit collection names",
-  			      _outputRelationCollections,
-  			      _outputRelationCollections ) ;
-
-    registerProcessorParameter("calibration_layergroups" ,
-                               "grouping of calo layers" ,
-                               _calibrationLayers,
-                               _calibrationLayers ) ;
-
-    registerProcessorParameter("calibration_factorsMipGev" ,
-                               "Calibration coefficients (MIP->shower GeV) of layers groups" ,
-                               _calibrationCoefficients,
-                               _calibrationCoefficients ) ;
-
-    registerProcessorParameter("CellIDLayerString" ,
-                               "name of the part of the cellID that holds the layer" , 
-                               _cellIDLayerString , 
-                               std::string("K-1") ) ;
   }
   
   //--------------------------------------------------------------------------
 
   void RealisticCaloReco::init() {
     printParameters() ;
-
-    // if no output collection names specified, set some default based on the input collection names
-    if ( _outputCollections.empty() ) {
-      for ( size_t i=0 ; i<_inputCollections.size() ; i++ ) {
-        _outputCollections.push_back( _inputCollections[i] + "Reco" ) ;
-      }
-    }
-    if ( _outputRelationCollections.size()==0 ) {
-      for (size_t i=0; i<_inputCollections.size(); i++) {
-        _outputRelationCollections.push_back( _inputCollections[i] + "DigiRelation" ) ;
-      }
-    }
-    if( _inputRelationCollections.size() != _inputCollections.size()
-     || _outputCollections.size() != _inputCollections.size() 
-     || _outputRelationCollections.size() != _inputCollections.size() 
-     || _calibrationCoefficients.empty() 
-     || _calibrationCoefficients.size() != _calibrationLayers.size() ) {
+    if( _inputRelationCollections.get().size() != _inputCollections.get().size()
+     || _outputCollections.get().size() != _inputCollections.get().size() 
+     || _outputRelationCollections.get().size() != _inputCollections.get().size() 
+     || _calibrationCoefficients.get().empty() 
+     || _calibrationCoefficients.get().size() != _calibrationLayers.get().size() ) {
       marlin::ProcessorApi::abort( this, "Invalid parameters from steering file. Please check your inputs!" ) ;
     }
   }
@@ -106,9 +56,9 @@ namespace marlinreco_mt {
     IMPL::LCFlagImpl relationFlag {} ;
     relationFlag.setBit( EVENT::LCIO::LCREL_WEIGHTED ) ; // for the hit relations
     // * Reading Collections of digitised calorimeter Hits *
-    for (unsigned int i(0); i < _inputCollections.size(); ++i) {
-      std::string colName =  _inputCollections[i] ;
-      std::string relName =  _inputRelationCollections[i] ;
+    for (unsigned int i(0); i < _inputCollections.get().size(); ++i) {
+      std::string colName =  _inputCollections.get()[i] ;
+      std::string relName =  _inputRelationCollections.get()[i] ;
       log<DEBUG>() << "looking for hit, relation collection: " << colName << " " << relName << std::endl ;
       try {
         auto collection = evt->getCollection( colName ) ;
@@ -153,8 +103,8 @@ namespace marlinreco_mt {
         }
         // add collection to event
         outputCollection->parameters().setValue( EVENT::LCIO::CellIDEncoding, cellIDString ) ;
-        evt->addCollection( outputCollection.release(),         _outputCollections[i] ) ;
-        evt->addCollection( relationOutputCollection.release(), _outputRelationCollections[i] ) ;
+        evt->addCollection( outputCollection.release(),         _outputCollections.get()[i] ) ;
+        evt->addCollection( relationOutputCollection.release(), _outputRelationCollections.get()[i] ) ;
       }
       catch( EVENT::DataNotAvailableException &e ) {
         log<DEBUG>() << "could not find input ECAL collection " << colName << std::endl ;
@@ -169,13 +119,13 @@ namespace marlinreco_mt {
     // retrieve calibration constants
     // Fixed the following logic (DJeans, June 2016)
     int min(0),max(0) ;
-    for (unsigned int k(0); k < _calibrationLayers.size(); ++k ) {
+    for (unsigned int k(0); k < _calibrationLayers.get().size(); ++k ) {
       if ( k > 0 ) {
-        min += _calibrationLayers[k-1] ;
+        min += _calibrationLayers.get()[k-1] ;
       }
-      max += _calibrationLayers[k] ;
+      max += _calibrationLayers.get()[k] ;
       if (ilayer >= min && ilayer < max) {
-        calibrationCoefficient = _calibrationCoefficients[k] ;
+        calibrationCoefficient = _calibrationCoefficients.get()[k] ;
         break ;
       }
     }

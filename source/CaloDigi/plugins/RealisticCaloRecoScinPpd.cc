@@ -15,10 +15,11 @@ namespace marlinreco_mt {
     float reconstructEnergy( UTIL::CellIDDecoder<EVENT::CalorimeterHit> &decoder, const EVENT::CalorimeterHit *hit ) const override ;
 
   private:
-    // # photoelectrons/MIP for MPPC
-    float         _photoelectronsPerMIP {10.f} ;
-    // # pixels in MPPC
-    int           _nPixels {10000} ;
+    marlin::Property<float> _photoelectronsPerMIP {this, "ppd_mipPe",
+                            "# Photo-electrons per MIP (scintillator): used to poisson smear #PEs if >0", 10.f } ;
+                            
+    marlin::Property<int> _nPixels {this, "ppd_npix",
+                            "total number of MPPC/SiPM pixels for implementation of saturation effect", 10000 } ;
   };
 
   //--------------------------------------------------------------------------
@@ -26,18 +27,7 @@ namespace marlinreco_mt {
   
   RealisticCaloRecoScinPpd::RealisticCaloRecoScinPpd() : 
     RealisticCaloReco("RealisticCaloRecoScinPpd") {
-
-    _description = "Performs fist reconstruction of scintillator calo hits";
-
-    registerProcessorParameter("ppd_mipPe" ,
-                               "# Photo-electrons per MIP (scintillator): used to poisson smear #PEs if >0" ,
-                               _photoelectronsPerMIP,
-                               _photoelectronsPerMIP) ;
-
-    registerProcessorParameter("ppd_npix" ,
-                               "total number of MPPC/SiPM pixels for implementation of saturation effect" ,
-                               _nPixels,
-                               _nPixels) ;
+    _description = "Performs fist reconstruction of scintillator calo hits" ;
   }
   
   //--------------------------------------------------------------------------
