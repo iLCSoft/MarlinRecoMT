@@ -26,102 +26,6 @@ namespace marlinreco_mt {
   RealisticCaloDigi::RealisticCaloDigi( const std::string &pname ) : Processor( pname ) {
 
     _description = "Performs digitization of sim calo hits. Virtual class." ;
-
-    // input collections of simcalohits
-    std::vector<std::string> inputCollections;
-    inputCollections.push_back("SimCalorimeterHits");
-    
-    registerInputCollections( EVENT::LCIO::SIMCALORIMETERHIT,
-                              "inputHitCollections" ,
-                              "input simcalhit Collection Names" ,
-                              _inputCollections ,
-                              inputCollections);
-
-    // since we don't know number of output collections a priori, 
-    // we can't use registerOutputCollection, but have to use registerProcessorParameter
-    std::vector<std::string>  outputCollections;
-    registerProcessorParameter( "outputHitCollections",
-  			      "output calorimeterhit Collection Names" ,
-  			      _outputCollections,
-  			      outputCollections );
-
-    // the collections of relations between sim and digitised hits
-    std::vector<std::string>  outputRelCollections;
-    registerProcessorParameter( "outputRelationCollections",
-  			      "output hit relatiob Collection Names" ,
-  			      _outputRelCollections,
-  			      outputRelCollections );
-
-    // energy threshold
-    registerProcessorParameter("threshold" ,
-                               "Threshold for Hit" ,
-                               _threshold_value,
-                               (float) 0.5 );
-
-    registerProcessorParameter("thresholdUnit" ,
-                               "Unit for threshold. Can be \"GeV\", \"MIP\" or \"px\". MIP and px need properly set calibration constants" ,
-                               _threshold_unit,
-                               std::string("MIP"));
-
-    // timing
-    registerProcessorParameter("timingCut" ,
-                               "Use hit times" ,
-                               _time_apply               ,
-                               (int)0);
-
-    registerProcessorParameter("timingCorrectForPropagation" ,
-                               "Correct hit times for propagation: radial distance/c" ,
-                               _time_correctForPropagation,
-                               (int)0);
-
-    registerProcessorParameter("timingWindowMin" ,
-                               "Time Window minimum time in ns" ,
-                               _time_windowMin,
-                               (float)-10.0);
-
-    registerProcessorParameter("timingWindowMax" ,
-                               "Time Window maximum time in ns" ,
-                               _time_windowMax,
-                               (float)+100.0);
-
-    // additional digi effects
-
-    registerProcessorParameter("calibration_mip" ,
-                               "average G4 deposited energy by MIP for calibration" ,
-                               _calib_mip,
-                               (float)1.0e-4);
-
-    registerProcessorParameter("miscalibration_uncorrel" ,
-                               "uncorrelated random gaussian miscalibration (as a fraction: 1.0 = 100%) " ,
-                               _misCalib_uncorrel,
-                               (float)0.0);
-
-    registerProcessorParameter("miscalibration_correl" ,
-                               "correlated random gaussian miscalibration (as a fraction: 1.0 = 100%) " ,
-                               _misCalib_correl,
-                               (float)0.0);
-
-    registerProcessorParameter("deadCell_fraction" ,
-                               "random dead cell fraction (as a fraction: 0->1) " ,
-                               _deadCell_fraction,
-                               (float)0.);
-
-    // simple model of electronics properties
-    registerProcessorParameter("elec_noise_mip",
-                               "typical electronics noise (in MIP units)",
-                               _elec_noiseMip,
-                               float (0));
-
-    registerProcessorParameter("elec_range_mip",
-                               "maximum of dynamic range of electronics (in MIPs)",
-                               _elec_rangeMip,
-                               float (2500) );
-
-    // code for layer info for cellID decoder
-    registerProcessorParameter("CellIDLayerString" ,
-                               "name of the part of the cellID that holds the layer" , 
-                               _cellIDLayerString , 
-                               std::string("K-1"));
   }
   
   //--------------------------------------------------------------------------
@@ -130,20 +34,20 @@ namespace marlinreco_mt {
     // usually a good idea to
     printParameters() ;
     // check that number of input and output collections names are the same
-    if( _outputCollections.size() != _inputCollections.size() ) {
+    if( _outputCollections.get().size() != _inputCollections.get().size() ) {
       marlin::ProcessorApi::abort( this, "Input/output collection list sizes are different" ) ;
     }
-    if( _outputRelCollections.size() != _inputCollections.size() ) {
+    if( _outputRelCollections.get().size() != _inputCollections.get().size() ) {
       marlin::ProcessorApi::abort( this, "Input/output collection list sizes are different" ) ;
     }
     // unit in which threshold is specified
-    if (_threshold_unit.compare("MIP") == 0) {
+    if (_threshold_unit.get().compare("MIP") == 0) {
       _threshold_iunit = EnergyScale::MIP ;
     } 
-    else if (_threshold_unit.compare("GeV") == 0) {
+    else if (_threshold_unit.get().compare("GeV") == 0) {
       _threshold_iunit = EnergyScale::GEVDEP ;
     } 
-    else if (_threshold_unit.compare("px") == 0) {
+    else if (_threshold_unit.get().compare("px") == 0) {
       _threshold_iunit = EnergyScale::NPE ;
     } 
     else {
@@ -172,8 +76,8 @@ namespace marlinreco_mt {
       eventData._eventCorrelMiscalib = miscalDistCorel( eventData._generator ) ;
     }
     // loop over simulated hit collections
-    for ( unsigned int i=0 ; i<_inputCollections.size() ; ++i ) {
-      auto colName = _inputCollections.at( i ) ;
+    for ( unsigned int i=0 ; i<_inputCollections.get().size() ; ++i ) {
+      auto colName = _inputCollections.get().at( i ) ;
       log<marlin::DEBUG1>() << "Looking for collection: " << colName << std::endl ;
       try {
         EVENT::LCCollection * col = evt->getCollection( colName.c_str() ) ;
@@ -236,9 +140,9 @@ namespace marlinreco_mt {
         } // input hits
         // add collection to event
         newcol->parameters().setValue( EVENT::LCIO::CellIDEncoding, initString );
-        evt->addCollection( newcol, _outputCollections[i] );
+        evt->addCollection( newcol, _outputCollections.get()[i] );
         // add relation collection to event
-        evt->addCollection( relcol, _outputRelCollections[i] );
+        evt->addCollection( relcol, _outputRelCollections.get()[i] );
       } 
       catch(EVENT::DataNotAvailableException &e) {
         log<marlin::DEBUG1>() << "Could not find input collection " << colName << std::endl;

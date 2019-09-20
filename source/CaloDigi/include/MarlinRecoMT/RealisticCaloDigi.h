@@ -8,6 +8,7 @@
 #include <IMPL/LCFlagImpl.h>
 #include <EVENT/SimCalorimeterHit.h>
 #include <EVENT/LCEvent.h>
+#include <EVENT/LCIO.h>
 
 // -- std headers
 #include <string>
@@ -110,39 +111,54 @@ namespace marlinreco_mt {
     virtual float convertEnergy( float energy, EnergyScale inScale ) const = 0 ;
 
   protected:
-    // processor parameters
-    ///< The input collection list
-    std::vector<std::string> _inputCollections {} ;
-    ///< The output collection list
-    std::vector<std::string> _outputCollections {} ;
-    ///< The output relation collection list
-    std::vector<std::string> _outputRelCollections {} ;
-    ///< The hit energy threshold
-    float _threshold_value {} ;
-    ///< The hit energy threshold unit
-    std::string _threshold_unit {} ;
-    ///< apply timing cuts?
-    int   _time_apply {} ; 
-    ///< correct times for propagation?             
-    int   _time_correctForPropagation {} ; 
-    ///< timing window minimum
-    float _time_windowMin {} ;  
-    ///< timing window minimum        
-    float _time_windowMax{ } ;
-    ///< MIP calibration factor (most probable energy deposit by MIP in active material of one layer)
-    float _calib_mip {} ;              
-    ///< general miscalibration (uncorrelated between channels)
-    float _misCalib_uncorrel {} ;       
-    ///< general miscalibration (100% uncorrelated between channels)
-    float _misCalib_correl {} ;           
-    ///< fraction of random dead channels
-    float _deadCell_fraction {} ;                  
-    ///< electronics noise (as fraction of MIP)
-    float _elec_noiseMip {} ;
-    ///< electronics dynamic range (in terms of MIPs)
-    float _elec_rangeMip {} ;           
-    ///< The cell id string for layers
-    std::string _cellIDLayerString {} ;
+        
+    marlin::InputCollectionsProperty _inputCollections {this, EVENT::LCIO::SIMCALORIMETERHIT, "inputHitCollections" ,
+                            "Input simcalhit Collection Names" , {"SimCalorimeterHits"} } ;
+
+    marlin::Property<EVENT::StringVec> _outputCollections {this, "outputHitCollections",
+  			                    "Output calorimeterhit Collection Names" } ;
+
+    marlin::Property<EVENT::StringVec> _outputRelCollections {this, "outputRelationCollections",
+  			                    "Output hit relation Collection Names" } ;
+
+    marlin::Property<float> _threshold_value {this, "threshold",
+  			                    "Threshold for Hit", 0.5 } ;
+                                                        
+    marlin::Property<std::string> _threshold_unit {this, "thresholdUnit",
+                            "Unit for threshold. Can be \"GeV\", \"MIP\" or \"px\". MIP and px need properly set calibration constants", "MIP" } ;
+                            
+    marlin::Property<bool> _time_apply {this, "timingCut",
+                            "Use hit times", false } ;
+                                                        
+    marlin::Property<bool> _time_correctForPropagation {this, "timingCorrectForPropagation",
+                            "Correct hit times for propagation: radial distance/c", false } ;
+                            
+    marlin::Property<float> _time_windowMin {this, "timingWindowMin",
+                            "Time Window minimum time in ns", -10. } ;
+    
+    marlin::Property<float> _time_windowMax {this, "timingWindowMax",
+                            "Time Window maximum time in ns", 100. } ;
+
+    marlin::Property<float> _calib_mip {this, "calibration_mip",
+                            "average G4 deposited energy by MIP for calibration", 1.e-4 } ;
+                            
+    marlin::Property<float> _misCalib_uncorrel {this, "miscalibration_uncorrel",
+                            "uncorrelated random gaussian miscalibration (as a fraction: 1.0 = 100%)", 0. } ;
+
+    marlin::Property<float> _misCalib_correl {this, "miscalibration_correl",
+                            "correlated random gaussian miscalibration (as a fraction: 1.0 = 100%)", 0. } ;
+
+    marlin::Property<float> _deadCell_fraction {this, "deadCell_fraction",
+                            "random dead cell fraction (as a fraction: 0->1)", 0. } ;
+                            
+    marlin::Property<float> _elec_noiseMip {this, "elec_noise_mip",
+                            "typical electronics noise (in MIP units)", 0. } ;
+                            
+    marlin::Property<float> _elec_rangeMip {this, "elec_range_mip",
+                            "maximum of dynamic range of electronics (in MIPs)", 2500 } ;
+                            
+    marlin::Property<std::string> _cellIDLayerString {this, "CellIDLayerString",
+                            "name of the part of the cellID that holds the layer", "K-1" } ;
     
     // internal variables (const by usage in processEvent)
     EnergyScale _threshold_iunit {} ;
