@@ -68,17 +68,21 @@ namespace marlinreco_mt {
     unsigned int getNAvailableEvents() ;
 
   protected:
-    // processor parameters
-    /// The overlay input file names
-    EVENT::StringVec                      _fileNames {} ;
-    /// The list of pair of collections to overlay (see class description)
-    EVENT::StringVec                      _overlayCollections {} ;    
-    /// The additional number of events to overlay
-    int                                   _numOverlay {0} ;
-    /// The mean value of the poisson distribution when randomly picking events
-    double                                _expBG {1} ;
-    /// The list of collection to exclude for overlay
-    EVENT::StringVec                      _excludeCollections {} ;
+    
+    marlin::Property<std::vector<std::string>> _fileNames {this, "InputFileNames" , 
+        "Name of the lcio input file(s)", {"undefined.slcio"} } ;
+  
+    marlin::Property<int> _numOverlay {this, "NumberOverlayEvents" , 
+        "Overlay each event with this number of background events. (default 0)" , 0 } ; 
+ 
+    marlin::Property<double> _expBG {this, "expBG" , 
+        "Add additional background events according to a poisson distribution with this expectation value. (non, if parameter not set)" , 1. } ;
+    
+    marlin::Property<std::vector<std::string>> _overlayCollections {this, "CollectionMap" , 
+        "Pairs of collection to be merged", {"MCParticle", "MCParticle"} } ;
+        
+    marlin::Property<std::vector<std::string>> _excludeCollections {this, "ExcludeCollections" , 
+        "List of collections to exclude for merging" } ;
     
     // internal members
     /// The total number of available overlay events from input files
@@ -101,31 +105,6 @@ namespace marlinreco_mt {
     Processor("Overlay") {
     // modify processor description
     _description = "Opens a second (chain of) lcio file(s) and overlays events..." ;
-
-    registerProcessorParameter( "InputFileNames" , 
-        "Name of the lcio input file(s)"  ,
-        _fileNames ,
-        EVENT::StringVec( {"undefined.slcio"} ) ) ;
-  
-    registerProcessorParameter( "NumberOverlayEvents" , 
-        "Overlay each event with this number of background events. (default 0)" ,
-        _numOverlay ,
-        static_cast<int>(0) ) ; 
- 
-    registerProcessorParameter( "expBG" , 
-        "Add additional background events according to a poisson distribution with this expectation value. (non, if parameter not set)" ,
-        _expBG ,
-        static_cast<double>(1.) ) ;
-    
-    registerProcessorParameter( "CollectionMap" , 
-        "Pairs of collection to be merged"  ,
-        _overlayCollections ,
-        EVENT::StringVec( {"MCParticle", "MCParticle"} ) ) ;
-        
-    registerProcessorParameter( "ExcludeCollections" , 
-        "List of collections to exclude for merging"  ,
-        _excludeCollections ,
-        EVENT::StringVec() ) ;
     
     // clone processors as they have to open files on first call
     forceRuntimeOption( Processor::RuntimeOption::Critical, false ) ;
@@ -139,22 +118,22 @@ namespace marlinreco_mt {
     printParameters() ;
     
     // prepare the lcio file handlers
-    _fileHandlerList.resize( _fileNames.size() ) ;
+    _fileHandlerList.resize( _fileNames.get().size() ) ;
     
-    for ( unsigned int i=0 ; i<_fileNames.size() ; i++ ) {
-      _fileHandlerList.at( i ).setFileName( _fileNames.at( i ) ) ;
+    for ( unsigned int i=0 ; i<_fileNames.get().size() ; i++ ) {
+      _fileHandlerList.at( i ).setFileName( _fileNames.get().at( i ) ) ;
     }
   
     // initalisation of random number generator
     marlin::ProcessorApi::registerForRandomSeeds( this ) ;
   
-    if ( _overlayCollections.size() % 2 ) {
+    if ( _overlayCollections.get().size() % 2 ) {
       marlin::ProcessorApi::abort( this, "Odd number of collection names, can't make a correct mapping" ) ;
     }
 
     // preparing collection map for merge.  
     // treating pairs of collection names
-    for ( auto iter = _overlayCollections.begin() ; iter != _overlayCollections.end() ; ++iter ) {  
+    for ( auto iter = _overlayCollections.get().begin() ; iter != _overlayCollections.get().end() ; ++iter ) {  
       std::string key = *iter ;
       ++iter ;
       _overlayCollectionMap[key] = *iter ;
@@ -216,8 +195,8 @@ namespace marlinreco_mt {
       }
       
       // Remove collections to exclude from the collection map
-      if(not _excludeCollections.empty()) {
-        for ( auto excludeCol : _excludeCollections ) {
+      if(not _excludeCollections.get().empty()) {
+        for ( auto excludeCol : _excludeCollections.get() ) {
           auto findIter = collectionMap.find( excludeCol );
           if( collectionMap.end() != findIter ) {
             collectionMap.erase( findIter );
