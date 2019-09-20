@@ -52,19 +52,43 @@ namespace marlinreco_mt {
     bool useLayer( unsigned int layer ) const ;
     
   protected:
-    std::vector<unsigned int>    _layersToKeep {} ;
-    std::vector<bool>            _useLayers {} ;
-    std::vector<std::string>     _inputCollections {} ;
-    std::string                  _outputCollection {} ;
-    std::string                  _outputRelCollection {} ;
-    std::string                  _cellIDLayerString = {"layer"} ;
-    std::string                  _caloLayout {} ;
-    std::string                  _caloID {} ;
-    std::string                  _caloType {} ;
-    float                        _energyThreshold {0.} ;
-    float                        _calibrationCoefficient {1.0} ;
-    float                        _maxHitEnergy {std::numeric_limits<float>::max()} ;
-    std::string                  _detectorName {} ;
+    marlin::InputCollectionsProperty _inputCollections {this, EVENT::LCIO::SIMCALORIMETERHIT, "InputCollections" , 
+            "Sim calo hit collection names" } ;
+     
+    marlin::OutputCollectionProperty _outputCollection {this, EVENT::LCIO::CALORIMETERHIT, "OutputCollection" , 
+            "Calo hit output collection of real Hits" } ;
+    
+    marlin::OutputCollectionProperty _outputRelCollection {this, EVENT::LCIO::LCRELATION, "RelationOutputCollection" , 
+            "CaloHit Relation Collection" } ;
+    
+    marlin::Property<float> _energyThreshold {this, "EnergyThreshold" , 
+             "Threshold for sim calo hit hits in GeV (raw deposited energy, not calibrated)" , 0.f } ;
+
+    marlin::Property<float> _calibrationCoefficient {this, "CalibrCoeff" , 
+             "Calibration coefficient for calo hits" , 1.f } ;
+
+    marlin::Property<float> _maxHitEnergy {this, "MaxHitEnergy", 
+             "maximum hit energy for a calo hit" , std::numeric_limits<float>::max() } ;
+
+    marlin::Property<std::vector<unsigned int>> _layersToKeep {this, "KeepLayers" , 
+             "Vector of layers to be kept. Layers start at 1!" } ;
+
+    marlin::Property<std::string> _cellIDLayerString {this, "CellIDLayerString" ,
+             "Name of the part of the cellID that holds the layer", "layer" } ;
+    
+    marlin::Property<std::string> _detectorName {this, "DetectorName" ,
+             "Name of the subdetector" } ;
+             
+    marlin::Property<std::string> _caloType {this, "CaloType" ,
+            "type of calorimeter: em, had, muon" } ;
+
+    marlin::Property<std::string> _caloID {this, "CaloID" ,
+            "ID of calorimeter: lcal, fcal, bcal" } ;
+
+    marlin::Property<std::string> _caloLayout {this, "CaloLayout" ,
+            "subdetector layout: barrel, endcap, plug, ring" } ;
+            
+    std::vector<bool>            _useLayers {} ;    
   };
   
   //--------------------------------------------------------------------------
@@ -72,71 +96,7 @@ namespace marlinreco_mt {
 
   SimpleCaloDigi::SimpleCaloDigi() : 
     marlin::Processor("SimpleCaloDigi") {
-      
     _description = "Performs simple digitization of sim hits..." ;
-
-    registerInputCollections( EVENT::LCIO::SIMCALORIMETERHIT, 
-  			    "InputCollections" , 
-  			    "Sim calo hit collection names" ,
-  			    _inputCollections ,
-  			    _inputCollections );
-    
-    registerOutputCollection( EVENT::LCIO::CALORIMETERHIT, 
-  			    "OutputCollection" , 
-  			    "Calo hit output collection of real Hits" , 
-  			    _outputCollection , 
-  			    _outputCollection ) ; 
-    
-    registerOutputCollection( EVENT::LCIO::LCRELATION, 
-  			    "RelationOutputCollection" , 
-  			    "CaloHit Relation Collection" , 
-  			    _outputRelCollection , 
-  			    _outputRelCollection ) ; 
-    
-    registerProcessorParameter("EnergyThreshold" , 
-  			     "Threshold for sim calo hit hits in GeV (raw deposited energy, not calibrated)" ,
-  			     _energyThreshold,
-  			     _energyThreshold );
-
-    registerProcessorParameter("CalibrCoeff" , 
-  			     "Calibration coefficients for calo hits" ,
-  			     _calibrationCoefficient,
-  			     _calibrationCoefficient );
-
-    registerProcessorParameter("MaxHitEnergy", 
-  			     "maximum hit energy for a calo hit" ,
-  			     _maxHitEnergy,
-  			     _maxHitEnergy );
-
-    registerProcessorParameter("KeepLayers" , 
-  			     "Vector of layers to be kept. Layers start at 1!",
-  			     _layersToKeep,
-  			     _layersToKeep );
-
-    registerProcessorParameter("CellIDLayerString" ,
-  			     "Name of the part of the cellID that holds the layer" , 
-  			     _cellIDLayerString , 
-  			     _cellIDLayerString );
-    
-    registerProcessorParameter("DetectorName" ,
-             "Name of the subdetector" , 
-             _detectorName , 
-             _detectorName );
-             
-    registerProcessorParameter("CaloType" ,
-            "type of calorimeter: em, had, muon" , 
-            _caloType , 
-            _caloType ) ;
-
-    registerProcessorParameter("CaloID" ,
-            "ID of calorimeter: lcal, fcal, bcal", 
-            _caloID , 
-            _caloID ) ;
-
-    registerProcessorParameter("CaloLayout" ,
-            "subdetector layout: barrel, endcap, plug, ring", 
-            _caloLayout , 
-            _caloLayout ) ;
   }
   
   //--------------------------------------------------------------------------
@@ -155,11 +115,11 @@ namespace marlinreco_mt {
       marlin::ProcessorApi::abort( this, "No detector available: " + std::string(e.what()) ) ;
     }
     // If the vectors are empty, we are keeping everything 
-    if(_layersToKeep.size() > 0) {
+    if(_layersToKeep.get().size() > 0) {
       // Layers start at 0
       for(unsigned int i = 0; i < nLayers; ++i) {
         _useLayers.push_back(false) ;
-        for(auto iter = _layersToKeep.begin(); iter < _layersToKeep.end(); ++iter) {
+        for(auto iter = _layersToKeep.get().begin(); iter < _layersToKeep.get().end(); ++iter) {
         	if (i == *iter-1) {
         	  _useLayers[i] = true ; 
             break;
@@ -186,8 +146,8 @@ namespace marlinreco_mt {
     auto caloID = caloIDFromString( _caloID ) ; 
     auto caloType = caloTypeFromString( _caloType ) ;
     // loop over input collections
-    for (unsigned int i(0); i < _inputCollections.size(); ++i) {
-      std::string colName =  _inputCollections[i] ;
+    for (unsigned int i(0); i < _inputCollections.get().size(); ++i) {
+      std::string colName =  _inputCollections.get()[i] ;
       try {
         auto collection = evt->getCollection( colName ) ;
         initString = collection->getParameters().getStringVal( EVENT::LCIO::CellIDEncoding ) ;
