@@ -126,17 +126,37 @@ namespace marlinreco_mt {
     
   protected:
     // processor parameters
-    std::string                              _inputCollectionName {} ;
-    std::string                              _inputRelCollectionName {} ;
-    std::string                              _outputCollectionName {} ;
-    std::string                              _outputRelCollectionName {} ;
-    float                                    _nominalVertexX {0.f} ;
-    float                                    _nominalVertexY {0.f} ;
-    float                                    _nominalVertexZ {0.f} ;
+    marlin::InputCollectionProperty _inputCollectionName {this, EVENT::LCIO::TRACKERHIT, "TrackerHitCollection",
+                           "The name of the input tracker hit collection", "FTDTrackerHits" } ; 
+
+    marlin::InputCollectionProperty _inputRelCollectionName {this, EVENT::LCIO::LCRELATION, "TrackerHitSimHitRelCollection",
+                           "The name of the input collection of the relations of the TrackerHits to SimHits", "FTDTrackerHitRelations" } ; 
+
+    marlin::OutputCollectionProperty _outputCollectionName {this, EVENT::LCIO::TRACKERHIT, "SpacePointsCollection",
+                            "The name of the output space point collection", "FTDSpacePoints" } ;
+
+    marlin::OutputCollectionProperty _outputRelCollectionName {this, EVENT::LCIO::LCRELATION, "SimHitSpacePointRelCollection",
+                            "Name of the SpacePoint SimTrackerHit relation collection", "FTDSimHitSpacepointRelations" } ;
+           
+    marlin::Property<float> _nominalVertexX {this, "NominalVertexX",
+                            "The global x coordinate of the nominal vertex used for calculation of strip hit intersections", 0.0 } ;
+
+    marlin::Property<float> _nominalVertexY {this, "NominalVertexY",
+                            "The global x coordinate of the nominal vertex used for calculation of strip hit intersections", 0.f } ;
+
+    marlin::Property<float> _nominalVertexZ {this, "NominalVertexZ",
+                            "The global x coordinate of the nominal vertex used for calculation of strip hit intersections", 0.f } ;
+     
+    marlin::Property<double> _stripLength {this, "StripLength",
+                            "The length of the strips of the subdetector in mm", 0. } ;
+
+    marlin::Property<float> _stripLengthTolerance {this, "StriplengthTolerance",
+                            "Tolerance added to the strip length when calculating strip hit intersections", 0.1 } ;
+
+    marlin::Property<std::string> _subDetectorName {this, "SubDetectorName" , 
+                            "Name of dub detector" , "SIT" } ;
+
     dd4hep::rec::Vector3D                    _nominalVertex {} ;
-    float                                    _stripLengthTolerance {0.1f} ;
-    double                                   _stripLength {0.f} ;
-    std::string                              _subDetectorName {} ;
     const dd4hep::rec::SurfaceMap           *_surfaceMap {nullptr} ;
   };
 
@@ -146,67 +166,6 @@ namespace marlinreco_mt {
     Processor("DDSpacePointBuilder") {
     // modify processor description
     _description = "DDSpacePointBuilder combine si-strip measurements into 3D spacepoints (1TrackerHitPlanar+1TrackHitPlanar = 1 TrackerHit), that can be used by reconstruction" ;
-
-    // register steering parameters: name, description, class-variable, default value
-    registerInputCollection(EVENT::LCIO::TRACKERHIT,
-                           "TrackerHitCollection",
-                           "TrackerHitCollection",
-                           _inputCollectionName,
-                           std::string("FTDTrackerHits")); 
-
-    registerInputCollection(EVENT::LCIO::LCRELATION,
-                           "TrackerHitSimHitRelCollection",
-                           "The name of the input collection of the relations of the TrackerHits to SimHits",
-                           _inputRelCollectionName,
-                           std::string("FTDTrackerHitRelations")); 
-
-    registerOutputCollection(EVENT::LCIO::TRACKERHIT,
-                            "SpacePointsCollection",
-                            "SpacePointsCollection",
-                            _outputCollectionName,
-                            std::string("FTDSpacePoints"));
-
-    registerOutputCollection(EVENT::LCIO::LCRELATION,
-                            "SimHitSpacePointRelCollection",
-                            "Name of the SpacePoint SimTrackerHit relation collection",
-                            _outputRelCollectionName,
-                            std::string("FTDSimHitSpacepointRelations"));
-      
-     
-    registerProcessorParameter("NominalVertexX",
-                               "The global x coordinate of the nominal vertex used for calculation of strip hit intersections",
-                               _nominalVertexX,
-                               float(0.0));
-
-
-    registerProcessorParameter("NominalVertexY",
-                               "The global x coordinate of the nominal vertex used for calculation of strip hit intersections",
-                               _nominalVertexY,
-                               float(0.0));
-
-
-    registerProcessorParameter("NominalVertexZ",
-                               "The global x coordinate of the nominal vertex used for calculation of strip hit intersections",
-                               _nominalVertexZ,
-                               float(0.0));
-     
-    // YV added
-    registerProcessorParameter("StripLength",
-                               "The length of the strips of the subdetector in mm",
-                               _stripLength,
-                               double(0.0));
-
-
-    registerProcessorParameter("StriplengthTolerance",
-                               "Tolerance added to the strip length when calculating strip hit intersections",
-                               _stripLengthTolerance,
-                               float(0.1));
-
-
-    registerProcessorParameter( "SubDetectorName" , 
-                               "Name of dub detector" ,
-                               _subDetectorName ,
-                                std::string("SIT") );
   }
 
   //--------------------------------------------------------------------------
