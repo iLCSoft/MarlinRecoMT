@@ -107,7 +107,7 @@ namespace marlinreco_mt {
       collection =  evt->getCollection( _inputCollectionName )  ; 
     } 
     catch( EVENT::DataNotAvailableException& ) {
-      log<DEBUG5>() <<  " input collection not in event : " << _inputCollectionName.get() << "   - nothing to do    !!! " << std::endl ;  
+      log<DEBUG5>() <<  " input collection not in event : " << _inputCollectionName << "   - nothing to do    !!! " << std::endl ;  
       return ;
     }
     // cellID converter function
