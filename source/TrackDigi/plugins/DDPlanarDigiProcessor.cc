@@ -86,15 +86,33 @@ namespace marlinreco_mt {
 
   protected:
     // processor parameters
-    std::string                _inputCollectionName {} ;
-    std::string                _outputCollectionName {} ;
-    std::string                _outputRelCollectionName {} ;
-    std::string                _subDetectorName {} ;
-    EVENT::FloatVec            _resolutionU {} ;
-    EVENT::FloatVec            _resolutionV {} ;
-    bool                       _isStrip {false} ;
-    bool                       _forceHitsOntoSurface {false} ;
-    double                     _minEnergy {0.} ;
+    marlin::InputCollectionProperty _inputCollectionName{this, EVENT::LCIO::SIMTRACKERHIT, "SimTrackHitCollectionName" , 
+                                "Name of the Input SimTrackerHit collection", "VXDCollection" } ;
+
+    marlin::OutputCollectionProperty _outputCollectionName {this, EVENT::LCIO::TRACKERHITPLANE, "TrackerHitCollectionName" , 
+                                "Name of the TrackerHit output collection" , "VTXTrackerHits" } ;
+    
+    marlin::OutputCollectionProperty _outputRelCollectionName {this, EVENT::LCIO::LCRELATION, "SimTrkHitRelCollection",
+                                "Name of TrackerHit SimTrackHit relation collection", "VTXTrackerHitRelations" } ;
+                                
+    marlin::Property<EVENT::FloatVec> _resolutionU {this, "ResolutionU",
+                                "resolution in direction of u - either one per layer or one for all layers ", {0.004} } ;
+                                
+    marlin::Property<EVENT::FloatVec> _resolutionV {this, "ResolutionV" ,
+                                "resolution in direction of v - either one per layer or one for all layers ", {0.004} } ;
+    
+    marlin::Property<bool> _isStrip {this, "IsStrip",
+                                "whether hits are 1D strip hits", false };
+                                
+    marlin::Property<bool> _forceHitsOntoSurface {this, "ForceHitsOntoSurface" , 
+                                "Project hits onto the surface in case they are not yet on the surface (default: false)" , false } ;
+
+    marlin::Property<double> _minEnergy {this, "MinimumEnergyPerHit" ,
+                                "Minimum Energy (in GeV!) to accept hits, other hits are ignored", 0.f } ;
+                                
+    marlin::Property<std::string> _subDetectorName {this, "SubDetectorName" , 
+                                "Name of dub detector", "VXD" } ;
+                                
     // to be replaced by std random stuff
     // gsl_rng* _rng ;
     const dd4hep::rec::SurfaceMap* _surfaceMap {nullptr} ;
@@ -106,58 +124,7 @@ namespace marlinreco_mt {
     Processor("DDPlanarDigiProcessor") {
     // modify processor description
     _description = "DDPlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters."
-      "The geoemtry of the surface is taken from the DDRec::Surface asscociated to the hit via the cellID" ;
-
-    registerProcessorParameter( "ResolutionU" ,
-                                "resolution in direction of u - either one per layer or one for all layers "  ,
-                                _resolutionU ,
-                                EVENT::FloatVec {0.004} ) ;
-
-    registerProcessorParameter( "ResolutionV" , 
-                                "resolution in direction of v - either one per layer or one for all layers " ,
-                               _resolutionV ,
-                                EVENT::FloatVec {0.004} );
-
-    registerProcessorParameter( "IsStrip",
-                                "whether hits are 1D strip hits",
-                                _isStrip,
-                                _isStrip );
-    
-    
-    registerProcessorParameter( "SubDetectorName" , 
-                               "Name of dub detector" ,
-                               _subDetectorName ,
-                                std::string("VXD") );
-      
-    // Input collections
-    registerInputCollection( EVENT::LCIO::SIMTRACKERHIT,
-                            "SimTrackHitCollectionName" , 
-                            "Name of the Input SimTrackerHit collection"  ,
-                            _inputCollectionName ,
-                            std::string("VXDCollection") ) ;
-    
-    // Output collections
-    registerOutputCollection( EVENT::LCIO::TRACKERHITPLANE,
-                             "TrackerHitCollectionName" , 
-                             "Name of the TrackerHit output collection"  ,
-                             _outputCollectionName ,
-                             std::string("VTXTrackerHits") ) ;
-    
-    registerOutputCollection( EVENT::LCIO::LCRELATION,
-                             "SimTrkHitRelCollection",
-                             "Name of TrackerHit SimTrackHit relation collection",
-                             _outputRelCollectionName,
-                             std::string("VTXTrackerHitRelations"));
-    
-    registerProcessorParameter( "ForceHitsOntoSurface" , 
-                                "Project hits onto the surface in case they are not yet on the surface (default: false)" ,
-                                _forceHitsOntoSurface ,
-                                _forceHitsOntoSurface );
-
-    registerProcessorParameter( "MinimumEnergyPerHit" ,
-                                "Minimum Energy (in GeV!) to accept hits, other hits are ignored",
-                                _minEnergy,
-                                _minEnergy );
+      "The geometry of the surface is taken from the DDRec::Surface asscociated to the hit via the cellID" ;
   }
 
   //--------------------------------------------------------------------------
@@ -169,26 +136,26 @@ namespace marlinreco_mt {
     // initalisation of random number generator
     marlin::ProcessorApi::registerForRandomSeeds( this ) ;
     
-    if( _resolutionU.size() != _resolutionV.size() ) {
+    if( _resolutionU.get().size() != _resolutionV.get().size() ) {
       std::stringstream ss ;
       ss << name() << "::init() - Inconsistent number of resolutions given for U and V coordinate: " 
-         << "ResolutionU  :" <<   _resolutionU.size() << " != ResolutionV : " <<  _resolutionV.size() ;
+         << "ResolutionU  :" <<   _resolutionU.get().size() << " != ResolutionV : " <<  _resolutionV.get().size() ;
       marlin::ProcessorApi::abort( this, ss.str() ) ;
     }
     
     //===========  get the surface map from the SurfaceManager ================
     dd4hep::Detector& theDetector = dd4hep::Detector::getInstance();
     dd4hep::rec::SurfaceManager& surfMan = *theDetector.extension<dd4hep::rec::SurfaceManager>() ;
-    dd4hep::DetElement det = theDetector.detector( _subDetectorName ) ;
+    dd4hep::DetElement det = theDetector.detector( _subDetectorName.get() ) ;
     _surfaceMap = surfMan.map( det.name() ) ;
     if( nullptr == _surfaceMap ) {   
       std::stringstream err  ; 
-      err << " Could not find surface map for detector: " << _subDetectorName << " in SurfaceManager " ;
+      err << " Could not find surface map for detector: " << _subDetectorName.get() << " in SurfaceManager " ;
       marlin::ProcessorApi::abort( this, err.str() ) ;
     }
     
     log<DEBUG3>() << " DDPlanarDigiProcessor::init(): found " << _surfaceMap->size() 
-                            << " surfaces for detector:" <<  _subDetectorName << std::endl ;
+                            << " surfaces for detector:" <<  _subDetectorName.get() << std::endl ;
   }
 
   //--------------------------------------------------------------------------
@@ -203,10 +170,10 @@ namespace marlinreco_mt {
     // get the input collection
     EVENT::LCCollection *inputCollection = nullptr ;
     try {
-      inputCollection = evt->getCollection( _inputCollectionName ) ;
+      inputCollection = evt->getCollection( _inputCollectionName.get() ) ;
     }
     catch( EVENT::DataNotAvailableException &) {
-      log<DEBUG4>() << "Collection " << _inputCollectionName.c_str() << " is unavailable in event " << evt->getEventNumber() << std::endl ;
+      log<DEBUG4>() << "Collection " << _inputCollectionName.get() << " is unavailable in event " << evt->getEventNumber() << std::endl ;
       return ;
     }
     // output collections
@@ -221,7 +188,7 @@ namespace marlinreco_mt {
     UTIL::CellIDDecoder<EVENT::SimTrackerHit> cellid_decoder( inputCollection ) ;
     
     int nSimHits = inputCollection->getNumberOfElements() ;
-    log<DEBUG4>() << " processing collection " << _inputCollectionName  << " with " <<  nSimHits  << " hits ... " << std::endl ;
+    log<DEBUG4>() << " processing collection " << _inputCollectionName.get()  << " with " <<  nSimHits  << " hits ... " << std::endl ;
     
     unsigned nCreatedHits = 0 ;
     unsigned nDismissedHits = 0 ;
@@ -229,7 +196,7 @@ namespace marlinreco_mt {
     for( int i=0 ; i<nSimHits ; ++i ) {
       auto simTHit = dynamic_cast<EVENT::SimTrackerHit*>( inputCollection->getElementAt( i ) ) ;
 
-      if( simTHit->getEDep() < _minEnergy ) {
+      if( simTHit->getEDep() < _minEnergy.get() ) {
         log<DEBUG>() << "Hit with insufficient energy " << simTHit->getEDep()*1e6 << " keV" << std::endl ;
         continue;
       }
@@ -257,7 +224,7 @@ namespace marlinreco_mt {
       //************************************************************ 
                                    
       if ( ! surf->insideBounds( dd4hep::mm * oldPos ) ) {      
-        if( _forceHitsOntoSurface ) {
+        if( _forceHitsOntoSurface.get() ) {
           dd4hep::rec::Vector2D lv = surf->globalToLocal( dd4hep::mm * oldPos  ) ;
           dd4hep::rec::Vector3D oldPosOnSurf = (1./dd4hep::mm) * surf->localToGlobal( lv ) ; 
           log<DEBUG3>() << " moved to " << oldPosOnSurf << " distance " << (oldPosOnSurf-oldPos).r() << std::endl ;       
@@ -279,8 +246,8 @@ namespace marlinreco_mt {
       double vL = lv[1] / dd4hep::mm ;
       bool accept_hit = false ;
       unsigned  tries   =  0 ;              
-      float resU = ( _resolutionU.size() > 1 ?   _resolutionU.at(  layer )     : _resolutionU.at(0)   )  ;
-      float resV = ( _resolutionV.size() > 1 ?   _resolutionV.at(  layer )     : _resolutionV.at(0)   )  ; 
+      float resU = ( _resolutionU.get().size() > 1 ?   _resolutionU.get().at(  layer )     : _resolutionU.get().at(0)   )  ;
+      float resV = ( _resolutionV.get().size() > 1 ?   _resolutionV.get().at(  layer )     : _resolutionV.get().at(0)   )  ; 
       
       while( tries <  DDPlanarDigiProcessor::SmearingNMaxTries ) {
       
@@ -290,8 +257,8 @@ namespace marlinreco_mt {
         double uSmear = gaussian( generator, std::normal_distribution<double>::param_type( 0., resU ) ) ;
         double vSmear = gaussian( generator, std::normal_distribution<double>::param_type( 0., resV ) ) ;
         dd4hep::rec::Vector3D newPosTmp = 1./dd4hep::mm  * 
-        ( ! _isStrip  ? surf->localToGlobal( dd4hep::rec::Vector2D (  ( uL + uSmear ) * dd4hep::mm, ( vL + vSmear )  *dd4hep::mm ) )  :
-                        surf->localToGlobal( dd4hep::rec::Vector2D (  ( uL + uSmear ) * dd4hep::mm,          0.                  ) ) ) ;
+        ( ! _isStrip.get()  ? surf->localToGlobal( dd4hep::rec::Vector2D (  ( uL + uSmear ) * dd4hep::mm, ( vL + vSmear )  *dd4hep::mm ) )  :
+                              surf->localToGlobal( dd4hep::rec::Vector2D (  ( uL + uSmear ) * dd4hep::mm,          0.                  ) ) ) ;
         log<DEBUG1>() << " hit at    : " << oldPos 
                                 << " smeared to: " << newPosTmp
                                 << " uL: " << uL 
@@ -340,7 +307,7 @@ namespace marlinreco_mt {
       log<DEBUG0>() << " U[0] = "<< u_direction[0] << " U[1] = "<< u_direction[1] 
                     << " V[0] = "<< v_direction[0] << " V[1] = "<< v_direction[1]
                     << std::endl ;
-      if( _isStrip ) {
+      if( _isStrip.get() ) {
         // store the resolution from the length of the wafer - in case a fitter might want to treat this as 2d hit ....
         double stripRes = (surf->length_along_v() / dd4hep::mm ) / std::sqrt( 12. ) ;
         trkHit->setdV( stripRes ); 
@@ -348,7 +315,7 @@ namespace marlinreco_mt {
       else {
         trkHit->setdV( resV ) ;
       }
-      if( _isStrip ) {
+      if( _isStrip.get() ) {
         trkHit->setType( UTIL::set_bit( trkHit->getType(), UTIL::ILDTrkHitTypeBit::ONE_DIMENSIONAL ) ) ;
       }
       //**************************************************************************
@@ -369,8 +336,8 @@ namespace marlinreco_mt {
     //**************************************************************************
     // Add collection to event
     //**************************************************************************    
-    evt->addCollection( outputCollection.release()    , _outputCollectionName    ) ;
-    evt->addCollection( outputRelCollection.release() , _outputRelCollectionName ) ;
+    evt->addCollection( outputCollection.release()    , _outputCollectionName.get()    ) ;
+    evt->addCollection( outputRelCollection.release() , _outputRelCollectionName.get() ) ;
     log<DEBUG4>() << "Created " << nCreatedHits << " hits, " << nDismissedHits << " hits  dismissed as not on sensitive element" << std::endl ;
   }
 
