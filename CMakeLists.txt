@@ -51,7 +51,7 @@ MACRO( ADD_MARLINRECOMT_PKG package_name )
     ENDIF()
     IF( EXISTS ${package_dir}/plugins )
       MESSAGE( STATUS "+===> compile plugins: ${package_dir}/plugins" )
-      AUX_SOURCE_DIRECTORY( ${package_dir}/plugins MarlinRecoMT_SRCS )
+      AUX_SOURCE_DIRECTORY( ${package_dir}/plugins MarlinRecoMTPlugin_SRCS )
     ENDIF()
 ENDMACRO()
 
@@ -64,6 +64,9 @@ ADD_MARLINRECOMT_PKG( TrackDigi )
 ADD_SHARED_LIBRARY( MarlinRecoMT ${MarlinRecoMT_SRCS} )
 INSTALL_SHARED_LIBRARY( MarlinRecoMT DESTINATION lib )
 
+ADD_SHARED_LIBRARY( MarlinRecoMTPlugins ${MarlinRecoMTPlugin_SRCS} )
+TARGET_LINK_LIBRARIES( MarlinRecoMTPlugins MarlinRecoMT )
+INSTALL_SHARED_LIBRARY( MarlinRecoMTPlugins DESTINATION lib )
 
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
