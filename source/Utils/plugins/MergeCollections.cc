@@ -51,7 +51,7 @@ namespace marlinreco_mt {
     marlin::Property<std::vector<int>> _inColIDs {this, "InputCollectionIDs" ,
               "IDs for input collections - if given id will be added to all objects in merged collections as ext<CollID)" } ;
 
-    marlin::OutputCollectionProperty _outColName  {this, "OutputCollection" ,
+    marlin::Property<std::string> _outColName  {this, "OutputCollection" ,
               "Name of output collection", "MergedCollection" } ;
 
     marlin::Property<int> _collectionParameterIndex {this, "CollectionParameterIndex",
