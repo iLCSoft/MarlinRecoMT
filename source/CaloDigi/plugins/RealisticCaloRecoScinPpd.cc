@@ -1,5 +1,7 @@
 #include <MarlinRecoMT/RealisticCaloReco.h>
 
+#include <marlin/PluginManager.h>
+
 namespace marlinreco_mt {
   
   /** === RealisticCaloRecoSilicon Processor === <br>
@@ -8,7 +10,6 @@ namespace marlinreco_mt {
   */
   class RealisticCaloRecoScinPpd : public RealisticCaloReco {
   public:
-    marlin::Processor *newProcessor() { return new RealisticCaloRecoScinPpd() ; }
     RealisticCaloRecoScinPpd() ;
 
   private:
@@ -56,6 +57,6 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  RealisticCaloRecoScinPpd aRealisticCaloRecoScinPpd ;
+  MARLIN_DECLARE_PROCESSOR( RealisticCaloRecoScinPpd )
 }
 

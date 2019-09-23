@@ -14,6 +14,7 @@
 // -- marlin headers
 #include <marlin/Processor.h>
 #include <marlin/ProcessorApi.h>
+#include <marlin/PluginManager.h>
 #include <marlin/Logging.h>
 using namespace marlin::loglevel ;
 
@@ -67,8 +68,6 @@ namespace marlinreco_mt {
     ~DDPlanarDigiProcessor() = default ;
     DDPlanarDigiProcessor(const DDPlanarDigiProcessor&) = delete ;
     DDPlanarDigiProcessor& operator=(const DDPlanarDigiProcessor&) = delete ;
-    
-    marlin::Processor*  newProcessor() { return new DDPlanarDigiProcessor ; }
 
     /**
      *  @brief  Constructor
@@ -342,5 +341,5 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  DDPlanarDigiProcessor aDDPlanarDigiProcessor ;
+  MARLIN_DECLARE_PROCESSOR( DDPlanarDigiProcessor )
 }

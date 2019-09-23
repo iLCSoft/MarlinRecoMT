@@ -9,6 +9,7 @@
 // -- marlin headers
 #include <marlin/Processor.h>
 #include <marlin/ProcessorApi.h>
+#include <marlin/PluginManager.h>
 #include <marlin/Logging.h>
 using namespace marlin::loglevel ;
 
@@ -45,8 +46,6 @@ namespace marlinreco_mt {
     };
 
    public:
-    marlin::Processor*  newProcessor() { return new SplitCollectionByLayerProcessor ; }
-
     /** Constructor
      */
     SplitCollectionByLayerProcessor() ;
@@ -166,5 +165,5 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  SplitCollectionByLayerProcessor aSplitCollectionByLayerProcessor ;
+  MARLIN_DECLARE_PROCESSOR( SplitCollectionByLayerProcessor )
 }

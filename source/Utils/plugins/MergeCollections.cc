@@ -6,6 +6,7 @@
 #include <marlin/Processor.h>
 #include <marlin/Logging.h>
 #include <marlin/ProcessorApi.h>
+#include <marlin/PluginManager.h>
 
 namespace marlinreco_mt {
 
@@ -24,8 +25,6 @@ namespace marlinreco_mt {
    */
   class MergeCollections : public marlin::Processor {
    public:
-    marlin::Processor*  newProcessor() { return new MergeCollections ; }
-
     /**
      *  @brief  Constructor
      */
@@ -207,5 +206,5 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  MergeCollections aMergeCollections ;
+  MARLIN_DECLARE_PROCESSOR( MergeCollections )
 }

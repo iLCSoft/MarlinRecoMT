@@ -1,6 +1,7 @@
 
 // -- marlin headers
 #include <marlin/Processor.h>
+#include <marlin/PluginManager.h>
 
 // -- MarlinRecoMT headers
 #include <MarlinRecoMT/SimpleParticleFactory.h>
@@ -76,7 +77,6 @@ namespace marlinreco_mt {
     SimpleFastMCProcessor() ;
     SimpleFastMCProcessor(const SimpleFastMCProcessor&) = delete;
     SimpleFastMCProcessor& operator=(const SimpleFastMCProcessor&) = delete;
-    marlin::Processor *newProcessor() ;
     void init() ;
     void processEvent( EVENT::LCEvent * evt ) ;
 
@@ -117,12 +117,6 @@ namespace marlinreco_mt {
       "according to the resolution given in the steering file." ;
 
     forceRuntimeOption( Processor::RuntimeOption::Clone, true ) ;
-  }
-
-  //--------------------------------------------------------------------------
-
-  marlin::Processor *SimpleFastMCProcessor::newProcessor() {
-    return new SimpleFastMCProcessor() ;
   }
 
   //--------------------------------------------------------------------------
@@ -168,6 +162,5 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  SimpleFastMCProcessor aSimpleFastMCProcessor ;
-
+  MARLIN_DECLARE_PROCESSOR( SimpleFastMCProcessor )
 } // end namespace

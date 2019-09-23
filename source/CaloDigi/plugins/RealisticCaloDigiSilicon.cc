@@ -5,6 +5,7 @@
 // -- marlin headers
 #include <marlin/Logging.h>
 #include <marlin/ProcessorApi.h>
+#include <marlin/PluginManager.h>
 
 // -- std headers
 #include <iostream>
@@ -15,9 +16,7 @@
 namespace marlinreco_mt {
 
   class RealisticCaloDigiSilicon : public RealisticCaloDigi {
-    
   public:
-    marlin::Processor *newProcessor() { return new RealisticCaloDigiSilicon ; }
     RealisticCaloDigiSilicon() ;
 
   protected:
@@ -81,6 +80,6 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  RealisticCaloDigiSilicon aRealisticCaloDigiSilicon ;
+  MARLIN_DECLARE_PROCESSOR( RealisticCaloDigiSilicon )
 }
 

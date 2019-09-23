@@ -15,6 +15,7 @@
 // -- marlin headers
 #include <marlin/Processor.h>
 #include <marlin/Logging.h>
+#include <marlin/PluginManager.h>
 #include <marlin/ProcessorApi.h>
 using namespace marlin::loglevel ;
 
@@ -96,8 +97,6 @@ namespace marlinreco_mt {
     DDSpacePointBuilderProcessor( const DDSpacePointBuilderProcessor & ) = delete ;
     DDSpacePointBuilderProcessor& operator=( const DDSpacePointBuilderProcessor & ) = delete ;
      
-    marlin::Processor*  newProcessor() { return new DDSpacePointBuilderProcessor ; }
-
     /**
      *  @brief  Constructor
      */
@@ -627,5 +626,5 @@ namespace marlinreco_mt {
   //--------------------------------------------------------------------------
 
   // processor declaration
-  DDSpacePointBuilderProcessor aDDSpacePointBuilderProcessor ;
+  MARLIN_DECLARE_PROCESSOR( DDSpacePointBuilderProcessor )
 }

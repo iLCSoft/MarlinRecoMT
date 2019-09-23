@@ -5,6 +5,7 @@
 // -- marlin headers
 #include <marlin/Processor.h>
 #include <marlin/ProcessorApi.h>
+#include <marlin/PluginManager.h>
 #include <marlin/Logging.h>
 using namespace marlin::loglevel ;
 
@@ -46,8 +47,6 @@ namespace marlinreco_mt {
     using RandomGenerator = std::mt19937 ;
     
    public:
-    marlin::Processor*  newProcessor() { return new OverlayProcessor ; }
-
     /** Constructor
      */
     OverlayProcessor() ;
@@ -256,5 +255,5 @@ namespace marlinreco_mt {
   }
 
   // processor declaration
-  OverlayProcessor anOverlayProcessor ;
+  MARLIN_DECLARE_PROCESSOR( OverlayProcessor )
 }
