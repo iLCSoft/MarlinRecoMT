@@ -4,117 +4,121 @@
 // #include "CLHEP/Vector/ThreeVector.h"
 #include <MarlinRecoMT/LCGeometryTypes.h>
 
-/** Definition of a LCPlane3D describing a geometrical plane in 3D space.
- *  @author T.Kraemer, DESY
- *  @version $Id: LCPlane3D.h,v 1.3 2006-10-19 15:59:26 tkraemer Exp $
- */
+namespace marlinreco_mt {
 
-class LCPlane3D {
-
-public:
-
-  /**
-   * Constructor from four numbers - creates plane a*x+b*y+c*z+d=0. 
-   * @param a
-   * @param b
-   * @param c
-   * @param d
+  /** Definition of a LCPlane3D describing a geometrical plane in 3D space.
+   *  @author T.Kraemer, DESY
+   *  @version $Id: LCPlane3D.h,v 1.3 2006-10-19 15:59:26 tkraemer Exp $
    */
-  LCPlane3D(double a = 0, double b = 0, double c = 1, double d = 0) ;
+  class LCPlane3D {
 
-  /**
-   * Constructor from normal and point. 
-   * @param normal vector pointing in the direction of the normal. 
-   *               This vector does not have to be normalised.
-   * @param point Point on the plane.
-   */
-  LCPlane3D(const LCVector3D &normal, const LCVector3D &point) ;
+  public:
 
-  /**
-   * Constructor from three different points. 
-   * @param point1 Point on the plane.
-   * @param point2 Point on the plane.
-   * @param point3 Point on the plane.
-   */
-  LCPlane3D(const LCVector3D &point1, const LCVector3D &point2, const LCVector3D &point3) ;
+    /**
+     * Constructor from four numbers - creates plane a*x+b*y+c*z+d=0. 
+     * @param a
+     * @param b
+     * @param c
+     * @param d
+     */
+    LCPlane3D(double a = 0, double b = 0, double c = 1, double d = 0) ;
 
-  /** Constructor for a plane using a normal and the Distance between Origen 
-   * and the plane.
-   * @param normal vector pointing in the direction of the normal. 
-   *               This vector does not have to be normalised.
-   * @param distance distance is the distance from the origen to the plane. 
-   */
-  LCPlane3D(const LCVector3D &normal, double distance) ;
+    /**
+     * Constructor from normal and point. 
+     * @param normal vector pointing in the direction of the normal. 
+     *               This vector does not have to be normalised.
+     * @param point Point on the plane.
+     */
+    LCPlane3D(const LCVector3D &normal, const LCVector3D &point) ;
 
-  /** Copy constructor.
-   * @param plane plane is an other LCPlane3D.
-   */
-  LCPlane3D(const LCPlane3D & plane) ;
+    /**
+     * Constructor from three different points. 
+     * @param point1 Point on the plane.
+     * @param point2 Point on the plane.
+     * @param point3 Point on the plane.
+     */
+    LCPlane3D(const LCVector3D &point1, const LCVector3D &point2, const LCVector3D &point3) ;
 
-  /**
-   * Destructor. */
-  ~LCPlane3D() {}
+    /** Constructor for a plane using a normal and the Distance between Origen 
+     * and the plane.
+     * @param normal vector pointing in the direction of the normal. 
+     *               This vector does not have to be normalised.
+     * @param distance distance is the distance from the origen to the plane. 
+     */
+    LCPlane3D(const LCVector3D &normal, double distance) ;
 
-  /**
-   * Assignment. */
+    /** Copy constructor.
+     * @param plane plane is an other LCPlane3D.
+     */
+    LCPlane3D(const LCPlane3D & plane) ;
 
-  LCPlane3D & operator=(const LCPlane3D & rhs) ;
+    /**
+     * Destructor. */
+    ~LCPlane3D() {}
 
-  /**
-   * Returns the a-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
-  double a() const ; 
+    /**
+     * Assignment. */
 
-  /**
-   * Returns the b-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
-  double b() const ; 
+    LCPlane3D & operator=(const LCPlane3D & rhs) ;
 
-  /**
-   * Returns the c-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
-  double c() const ; 
+    /**
+     * Returns the a-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
+    double a() const ; 
 
-  /**
-   * Returns the free member of the plane equation: a*x+b*y+c*z+d=0. */
-  double d() const ;
+    /**
+     * Returns the b-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
+    double b() const ; 
 
-  /**
-   * Returns normal. */
-  LCVector3D normal() const ;
+    /**
+     * Returns the c-coefficient in the plane equation: a*x+b*y+c*z+d=0. */
+    double c() const ; 
 
-  /**
-   * Normalization. */
-  LCPlane3D & normalize() ;
+    /**
+     * Returns the free member of the plane equation: a*x+b*y+c*z+d=0. */
+    double d() const ;
 
-  /**
-   * Distance of a point to the plane. 
-   * The value of the distance is 
-   * - negative if the point and the origen are on the same side of the plane
-   * - positive if the Point and the origen are on opposite sides of the 
-   *   plane.
-   * @param point point is a point in space
-   */
-  double distance(const LCVector3D & point) const ;  
+    /**
+     * Returns normal. */
+    LCVector3D normal() const ;
 
-  /**
-   * Projection of a point on to the plane. 
-   * @param point point is a point in space.
-   */
-  LCVector3D projectPoint(const LCVector3D & point) const ;
+    /**
+     * Normalization. */
+    LCPlane3D & normalize() ;
 
-  /**
-   * Projection of the origin onto the plane. */
-  LCVector3D projectPoint() const ;
+    /**
+     * Distance of a point to the plane. 
+     * The value of the distance is 
+     * - negative if the point and the origen are on the same side of the plane
+     * - positive if the Point and the origen are on opposite sides of the 
+     *   plane.
+     * @param point point is a point in space
+     */
+    double distance(const LCVector3D & point) const ;  
 
-  /**
-   * Test for equality. */
-  bool operator==(const LCPlane3D & plane) const ; 
+    /**
+     * Projection of a point on to the plane. 
+     * @param point point is a point in space.
+     */
+    LCVector3D projectPoint(const LCVector3D & point) const ;
 
-  /**
-   * Test for inequality. */
-  bool operator!=(const LCPlane3D & plane) const ; 
+    /**
+     * Projection of the origin onto the plane. */
+    LCVector3D projectPoint() const ;
 
-protected:
-  double _a=0, _b=0, _c=0, _d=0;
-};
+    /**
+     * Test for equality. */
+    bool operator==(const LCPlane3D & plane) const ; 
 
-std::ostream & operator << (std::ostream &os, const LCPlane3D &p) ;
+    /**
+     * Test for inequality. */
+    bool operator!=(const LCPlane3D & plane) const ; 
+
+  protected:
+    double _a=0, _b=0, _c=0, _d=0;
+  };
+
+  std::ostream & operator << (std::ostream &os, const LCPlane3D &p) ;
+  
+}
+
 #endif /* ifndef LCPlane3D_H */
