@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="us-ascii"?>
+
+
+
+<!--
+Without writing to file:
+
+[ MESSAGE "PEPScheduler"] 
+[ MESSAGE "PEPScheduler"] Total:                                  1.104684e+02 s in          600 events  ==>     0.184114 [ s/evt.] 
+[ MESSAGE "PEPScheduler"] 
+[ MESSAGE "PEPScheduler"]  Threading summary
+[ MESSAGE "PEPScheduler"]    N threads:                      5
+[ MESSAGE "PEPScheduler"]    Speedup (serial/parallel):      110.468 / 23.1245 = 4.77712
+[ MESSAGE "PEPScheduler"]    Speedup percentage:             94.4281 %
+[ MESSAGE "PEPScheduler"]    Queue lock time:                2.50604 ms
+[ MESSAGE "PEPScheduler"]    Pop event time:                 5262.61 ms
+[ MESSAGE "PEPScheduler"]    Lock time fraction:             0 %
+[ MESSAGE "PEPScheduler"] 
+
+
+With writing to file:
+
+[ MESSAGE "PEPScheduler"] 
+[ MESSAGE "PEPScheduler"] Total:                                  1.855431e+02 s in          600 events  ==>     0.309238 [ s/evt.] 
+[ MESSAGE "PEPScheduler"] 
+[ MESSAGE "PEPScheduler"]  Threading summary
+[ MESSAGE "PEPScheduler"]    N threads:                      5
+[ MESSAGE "PEPScheduler"]    Speedup (serial/parallel):      185.543 / 38.7135 = 4.79273
+[ MESSAGE "PEPScheduler"]    Speedup percentage:             94.8181 %
+[ MESSAGE "PEPScheduler"]    Queue lock time:                2.92677 ms
+[ MESSAGE "PEPScheduler"]    Pop event time:                 8780.43 ms
+[ MESSAGE "PEPScheduler"]    Lock time fraction:             0 %
+
+
+
+-->
+
+<marlin>
+  <execute>
+    <!-- Display event and run number -->
+    <processor name="Status"/>
+    
+    <!-- ECal pre-digitisation -->
+    <processor name="MergeCollectionsEcalBarrelHits"/>
+    <processor name="MergeCollectionsEcalEndcapHits"/>
+    
+    <!-- ECal digitisation -->
+    <!-- ECal barrel -->
+    <processor name="MyEcalBarrelDigi"/>
+    <processor name="MyEcalBarrelReco"/>
+    <processor name="MyEcalBarrelGapFiller"/>
+    <!-- ECal endcap -->
+    <processor name="MyEcalEndcapDigi"/>
+    <processor name="MyEcalEndcapReco"/>
+    <processor name="MyEcalEndcapGapFiller"/>
+    <!-- ECal ring -->
+    <processor name="MyEcalRingDigi"/>
+    <processor name="MyEcalRingReco"/>
+    
+    <!-- HCal digitisation -->
+    <!-- HCal barrel -->
+    <processor name="MyHcalBarrelDigi"/>
+    <processor name="MyHcalBarrelReco"/>
+    <!-- HCal endcap -->
+    <processor name="MyHcalEndcapDigi"/>
+    <processor name="MyHcalEndcapReco"/>
+    <!-- HCal ring -->
+    <processor name="MyHcalRingDigi"/>
+    <processor name="MyHcalRingReco"/>
+    
+    <!-- FCal digitisation -->
+    <processor name="MyBCalDigi"/>
+    <processor name="MyLCalDigi"/>
+    <processor name="MyLHCalDigi"/>
+    
+    <!-- Muon digitisation -->
+    <processor name="MyYokeBarrelDigi"/>
+    <processor name="MyYokeEndcapDigi"/>
+    
+    <!-- Tracking device digitisation -->
+    <processor name="MySplitCollectionByLayer"/>
+    <processor name="VXDPlanarDigiProcessor_CMOSVXD5"/>
+    <processor name="SITPlanarDigiProcessor"/>
+    <processor name="FTDPixelPlanarDigiProcessor"/>
+    <processor name="FTDStripPlanarDigiProcessor"/>
+    <processor name="SETPlanarDigiProcessor"/>
+    
+    <!-- LCIO output processor -->
+    <!-- <processor name="MyDumpEvent"/> -->
+    <if condition="${WriteOutput}">
+      <processor name="MyLCIOOutputProcessor"/>
+    </if>
+  </execute>
+  
+  <constants>
+    <constant name="lcgeo_DIR" value="/path/to/lcgeo" />
+    <constant name="DetectorModel" value="ILD_l5_v02" />
+    <constant name="CompactFile" value="${lcgeo_DIR}/ILD/compact/${DetectorModel}/${DetectorModel}.xml" />
+    <!-- Some calibration constant from ILDConfig -->
+    <constant name="EcalBarrelMip">0.0001525</constant>
+    <constant name="EcalEndcapMip">0.0001525</constant>
+    <constant name="EcalRingMip">0.0001525</constant>
+    <constant name="HcalBarrelMip">0.0004925</constant>
+    <constant name="HcalEndcapMip">0.0004775</constant>
+    <constant name="HcalRingMip">0.0004875</constant>
+    <constant name="EcalBarrelEnergyFactors">0.00616736103247 0.0125274552256</constant>
+    <constant name="EcalEndcapEnergyFactors">0.0064868449976 0.0131764071919</constant>
+    <constant name="EcalRingEnergyFactors">0.0064868449976 0.0131764071919</constant>
+    <constant name="HcalBarrelEnergyFactors">0.0216747245411</constant>
+    <constant name="HcalEndcapEnergyFactors">0.0217395864899</constant>
+    <constant name="HcalRingEnergyFactors">0.0271318181372</constant>
+    <constant name="InputFileDirectory" value="/home/eteremi/afs" />
+    <constant name="WriteOutput" value="false" />
+    
+  </constants>
+
+  <global>
+    <parameter name="Verbosity"> MESSAGE </parameter>
+    <parameter name="Concurrency"> 10 </parameter>
+    <parameter name="ColoredConsole"> 0 </parameter>
+    <!-- <parameter name="LogFileName"> toto.log </parameter> -->
+  </global>
+
+  <datasource type="LCIO">
+    <parameter name="LCIOInputFiles">
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_000.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_200.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_300.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_400.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_500.slcio
+      ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_600.slcio
+    </parameter>
+    <!--
+
+    ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_700.slcio
+    ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_800.slcio
+    ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_00_900.slcio
+    ${InputFileDirectory}/ddsim-sv02-00-01-GILD_l5_v02-Zuds200_01_000.slcio
+  -->
+    
+    <parameter name="MaxRecordNumber" value="0"/>
+    <parameter name="SkipNEvents" value="0"/>
+    <parameter name="LazyUnpack" value="true"/>
+  </datasource>
+
+  <geometry type="DD4hepGeometry">
+    <parameter name="CompactFile"> ${CompactFile} </parameter>
+    <parameter name="DumpGeometry"> false </parameter>
+  </geometry>
+
+  <processor name="MyDumpEvent" type="DumpEvent">
+    <parameter name="DumpDetailed"> false </parameter>
+  </processor>
+
+  <processor name="Status" type="Statusmonitor" clone="false">
+    <parameter name="Verbosity"> MESSAGE </parameter>
+  </processor>
+  
+  <!-- The next processors configuration is a copy past from ILDConfig calo digi config  -->
+  
+  <!-- Merge collection odd/even of ECal hits in case of ecal hybrid model simulation -->
+  <!-- Does nothing in case the input collections do not exist (in case of ecal non-hybrid simulations) -->
+  <processor name="MergeCollectionsEcalBarrelHits" type="MergeCollections">
+    <parameter name="InputCollections" type="StringVec"> ECalBarrelSiHitsEven ECalBarrelSiHitsOdd </parameter>
+    <parameter name="OutputCollection" type="string"> EcalBarrelCollection </parameter>
+  </processor>
+
+  <processor name="MergeCollectionsEcalEndcapHits" type="MergeCollections">
+    <parameter name="InputCollections" type="StringVec"> ECalEndcapSiHitsEven ECalEndcapSiHitsOdd </parameter>
+    <parameter name="OutputCollection" type="string"> EcalEndcapsCollection </parameter>
+  </processor>
+
+  <!--### the Ecal barrel ###-->
+  <!--digitisation -->
+  <processor name="MyEcalBarrelDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalBarrelCollection </parameter>
+    <parameter name="outputHitCollections"> EcalBarrelCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalBarrelRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalBarrelMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyEcalBarrelReco" type="RealisticCaloRecoSilicon">
+    <parameter name="inputHitCollections"> EcalBarrelCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> EcalBarrelRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> EcalBarrelCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> EcalBarrelRelationsSimRec </parameter>
+    <parameter name="calibration_layergroups"> 20 11 </parameter>
+    <parameter name="calibration_factorsMipGev">${EcalBarrelEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- gap filling -->
+  <processor name="MyEcalBarrelGapFiller" type="BruteForceEcalGapFiller">
+    <parameter name="inputHitCollection"> EcalBarrelCollectionRec </parameter>
+    <parameter name="outputHitCollection"> EcalBarrelCollectionGapHits </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="CellIDModuleString"> module </parameter>
+    <parameter name="CellIDStaveString"> stave </parameter>
+    <parameter name="expectedInterModuleDistance"> 7.0 </parameter>
+  </processor>
+  
+  <!--### the Ecal endcaps ###-->
+  <!-- digitisation -->
+  <processor name="MyEcalEndcapDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapsCollection </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapsCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalEndcapMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyEcalEndcapReco" type="RealisticCaloRecoSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapsCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> EcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapsCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapsRelationsSimRec </parameter>
+    <parameter name="calibration_layergroups"> 20 11 </parameter>
+    <parameter name="calibration_factorsMipGev">${EcalEndcapEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- gap filling -->
+  <processor name="MyEcalEndcapGapFiller" type="BruteForceEcalGapFiller">
+    <parameter name="inputHitCollection"> EcalEndcapsCollectionRec </parameter>
+    <parameter name="outputHitCollection"> EcalEndcapsCollectionGapHits </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="CellIDModuleString"> module </parameter>
+    <parameter name="CellIDStaveString"> stave </parameter>
+    <parameter name="expectedInterModuleDistance"> 7.0 </parameter>
+  </processor>
+  
+  <!--### the Ecal endcap rings ###-->
+  <!-- digitisation -->
+  <processor name="MyEcalRingDigi" type="RealisticCaloDigiSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapRingCollection </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapRingCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <parameter name="calibration_mip">${EcalRingMip}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyEcalRingReco" type="RealisticCaloRecoSilicon">
+    <parameter name="inputHitCollections"> EcalEndcapRingCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> EcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> EcalEndcapRingCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> EcalEndcapRingRelationsSimRec </parameter>
+    <parameter name="calibration_layergroups"> 20 11 </parameter>
+    <parameter name="calibration_factorsMipGev">${EcalRingEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Hcal barrel ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalBarrelDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalBarrelRegCollection </parameter>
+    <parameter name="outputHitCollections"> HcalBarrelCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalBarrelRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalBarrelMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyHcalBarrelReco" type="RealisticCaloRecoScinPpd">
+    <parameter name="inputHitCollections"> HcalBarrelCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> HcalBarrelRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> HcalBarrelCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> HcalBarrelRelationsSimRec </parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter> 
+    <parameter name="ppd_npix"> 2000 </parameter> 
+    <parameter name="calibration_layergroups"> 100 </parameter>
+    <!-- factor to convert from MIP to GeV (including energy in absorber) -->
+    <parameter name="calibration_factorsMipGev">${HcalBarrelEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Hcal endcaps ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalEndcapDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapsCollection </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapsCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalEndcapMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyHcalEndcapReco" type="RealisticCaloRecoScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapsCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> HcalEndcapsRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapsCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapsRelationsSimRec </parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter> 
+    <parameter name="ppd_npix"> 2000 </parameter> 
+    <parameter name="calibration_layergroups"> 100 </parameter>
+    <!-- factor to convert from MIP to GeV (including energy in absorber) -->
+    <parameter name="calibration_factorsMipGev">${HcalEndcapEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!--### the Hcal ring ###-->
+  <!-- digitisation -->
+  <processor name="MyHcalRingDigi" type="RealisticCaloDigiScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapRingCollection </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapRingCollectionDigi </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="threshold"> 0.5 </parameter>
+    <parameter name="thresholdUnit"> MIP </parameter>
+    <parameter name="timingCut"> 1  </parameter>
+    <!-- the ave energy deposition of a MIP in the scint -->
+    <parameter name="calibration_mip">${HcalRingMip}</parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter>
+    <parameter name="ppd_npix"> 2000 </parameter>
+    <parameter name="ppd_npix_uncert"> 0 </parameter>
+    <parameter name="ppd_pix_spread"> 0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  <!-- reconstruction -->
+  <processor name="MyHcalRingReco" type="RealisticCaloRecoScinPpd">
+    <parameter name="inputHitCollections"> HcalEndcapRingCollectionDigi </parameter>
+    <parameter name="inputRelationCollections"> HcalEndcapRingRelationsSimDigi </parameter>
+    <parameter name="outputHitCollections"> HcalEndcapRingCollectionRec </parameter>
+    <parameter name="outputRelationCollections"> HcalEndcapRingRelationsSimRec </parameter>
+    <parameter name="ppd_mipPe"> 15 </parameter> 
+    <parameter name="ppd_npix"> 2000 </parameter> 
+    <parameter name="calibration_layergroups"> 100 </parameter>
+    <!-- factor to convert from MIP to GeV (including energy in absorber) -->
+    <parameter name="calibration_factorsMipGev">${HcalRingEnergyFactors}</parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+  </processor>
+  
+  <!-- BeamCal digitizer -->
+  <processor name="MyBCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> BeamCalCollection </parameter>
+    <parameter name="OutputCollection"> BCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationBCalHit </parameter>
+    <parameter name="EnergyThreshold"> 5e-05 </parameter>
+    <parameter name="CalibrCoeff"> 79.6 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> BeamCal </parameter>
+    <parameter name="CaloID"> bcal </parameter>
+    <parameter name="CaloType"> em </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- LCal digitizer -->
+  <processor name="MyLCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> LumiCalCollection </parameter>
+    <parameter name="OutputCollection"> LCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationLcalHit </parameter>
+    <parameter name="EnergyThreshold"> 0.4e-04 </parameter>
+    <parameter name="CalibrCoeff"> 89.0 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> Lcal </parameter>
+    <parameter name="CaloID"> lcal </parameter>
+    <parameter name="CaloType"> em </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- LHCal digitizer -->
+  <processor name="MyLHCalDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> LHCalCollection </parameter>
+    <parameter name="OutputCollection"> LHCAL </parameter>
+    <parameter name="RelationOutputCollection"> RelationLHcalHit </parameter>
+    <parameter name="EnergyThreshold"> 1.7e-04 </parameter>
+    <parameter name="CalibrCoeff"> 150 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> LHCal </parameter>
+    <parameter name="CaloID"> lhcal </parameter>
+    <parameter name="CaloType"> had </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <!-- Muon chamber barrel digitizer -->
+  <processor name="MyYokeBarrelDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> YokeBarrelCollection </parameter>
+    <parameter name="OutputCollection"> MUONBarrel </parameter>
+    <parameter name="RelationOutputCollection"> RelationMuonBarrelHit </parameter>
+    <parameter name="EnergyThreshold"> 1.76e-08 </parameter>
+    <parameter name="MaxHitEnergy"> 2.0 </parameter>
+    <parameter name="CalibrCoeff"> 56.7 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> YokeBarrel </parameter>
+    <parameter name="CaloID"> yoke </parameter>
+    <parameter name="CaloType"> muon </parameter>
+    <parameter name="CaloLayout"> barrel </parameter>
+  </processor>
+
+  <!-- Muon chamber endcap digitizer -->  
+  <processor name="MyYokeEndcapDigi" type="SimpleCaloDigi">
+    <parameter name="InputCollections"> YokeEndcapsCollection </parameter>
+    <parameter name="OutputCollection"> MUONEndcap </parameter>
+    <parameter name="RelationOutputCollection"> RelationMuonEndcapHit </parameter>
+    <parameter name="EnergyThreshold"> 1.76e-08 </parameter>
+    <parameter name="MaxHitEnergy"> 2.0 </parameter>
+    <parameter name="CalibrCoeff"> 56.7 </parameter>
+    <parameter name="CellIDLayerString"> layer </parameter>
+    <parameter name="DetectorName"> YokeEndcap </parameter>
+    <parameter name="CaloID"> yoke </parameter>
+    <parameter name="CaloType"> muon </parameter>
+    <parameter name="CaloLayout"> endcap </parameter>
+  </processor>
+  
+  <processor name="MySplitCollectionByLayer" type="SplitCollectionByLayer" clone="false">
+    <!--split a hit collection based on the layer number of the hits -->
+    <!--Name of the input collection with hits-->
+    <parameter name="InputCollection" type="string">FTDCollection</parameter>
+    <!--Name of the output collection with start and end layer number-->
+    <parameter name="OutputCollections" type="StringVec">FTD_PIXELCollection 0 1 FTD_STRIPCollection 2 6</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!-- <parameter name="Verbosity" type="string">DEBUG </parameter> -->
+  </processor>
+  
+  <processor name="VXDPlanarDigiProcessor_CMOSVXD5" type="DDPlanarDigiProcessor" clone="false">
+    <!--Project hits onto the surface in case they are not yet on the surface (default: false)-->
+    <parameter name="ForceHitsOntoSurface" type="bool">true</parameter>
+    <!--PlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters.-->
+    <parameter name="SubDetectorName" type="string">VXD</parameter>
+    <!--whether hits are 1D strip hits-->
+    <parameter name="IsStrip" type="bool">false</parameter>
+    <!--resolution in direction of u-->
+    <parameter name="ResolutionU" type="float">0.003 0.003 0.003 0.003 0.003 0.003</parameter>
+    <!--resolution in direction of v-->
+    <parameter name="ResolutionV" type="float">0.003 0.003 0.003 0.003 0.003 0.003</parameter>
+    <!--Name of the Input SimTrackerHit collection-->
+    <parameter name="SimTrackHitCollectionName" type="string" lcioInType="SimTrackerHit">VXDCollection</parameter>
+    <!--Name of TrackerHit SimTrackHit relation collection-->
+    <parameter name="SimTrkHitRelCollection" type="string" lcioOutType="LCRelation">VXDTrackerHitRelations</parameter>
+    <!--Name of the TrackerHit output collection-->
+    <parameter name="TrackerHitCollectionName" type="string" lcioOutType="TrackerHitPlane">VXDTrackerHits</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!-- <parameter name="Verbosity" type="string">DEBUG3 </parameter> -->
+  </processor>
+  
+  <processor name="SITPlanarDigiProcessor" type="DDPlanarDigiProcessor" clone="false">
+    <!--Project hits onto the surface in case they are not yet on the surface (default: false)-->
+    <parameter name="ForceHitsOntoSurface" type="bool">true</parameter>
+    <!--PlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters.-->
+    <parameter name="SubDetectorName" type="string">SIT</parameter>
+    <!--whether hits are 1D strip hits-->
+    <parameter name="IsStrip" type="bool">false</parameter>
+    <!--resolution in direction of u-->
+    <parameter name="ResolutionU" type="float">0.005</parameter>
+    <!--resolution in direction of v-->
+    <parameter name="ResolutionV" type="float">0.005</parameter>
+    <!--Name of the Input SimTrackerHit collection-->
+    <parameter name="SimTrackHitCollectionName" type="string" lcioInType="SimTrackerHit">SITCollection</parameter>
+    <!--Name of TrackerHit SimTrackHit relation collection-->
+    <parameter name="SimTrkHitRelCollection" type="string" lcioOutType="LCRelation">SITTrackerHitRelations</parameter>
+    <!--Name of the TrackerHit output collection-->
+    <parameter name="TrackerHitCollectionName" type="string" lcioOutType="TrackerHitPlane">SITTrackerHits</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+  </processor>
+  
+  <processor name="FTDPixelPlanarDigiProcessor" type="DDPlanarDigiProcessor" clone="false">
+    <!--Project hits onto the surface in case they are not yet on the surface (default: false)-->
+    <parameter name="ForceHitsOntoSurface" type="bool">true</parameter>
+    <!--PlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters.-->
+    <parameter name="SubDetectorName" type="string">FTD</parameter>
+    <!--whether hits are 1D strip hits-->
+    <parameter name="IsStrip" type="bool">false</parameter>
+    <!--resolution in direction of u-->
+    <parameter name="ResolutionU" type="float">0.003</parameter>
+    <!--resolution in direction of v-->
+    <parameter name="ResolutionV" type="float">0.003</parameter>
+    <!--Name of the Input SimTrackerHit collection-->
+    <parameter name="SimTrackHitCollectionName" type="string" lcioInType="SimTrackerHit">FTD_PIXELCollection</parameter>
+    <!--Name of TrackerHit SimTrackHit relation collection-->
+    <parameter name="SimTrkHitRelCollection" type="string" lcioOutType="LCRelation">FTDPixelTrackerHitRelations</parameter>
+    <!--Name of the TrackerHit output collection-->
+    <parameter name="TrackerHitCollectionName" type="string" lcioOutType="TrackerHitPlane">FTDPixelTrackerHits</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+  </processor>
+  
+  <processor name="FTDStripPlanarDigiProcessor" type="DDPlanarDigiProcessor" clone="false">
+    <!--Project hits onto the surface in case they are not yet on the surface (default: false)-->
+    <parameter name="ForceHitsOntoSurface" type="bool">true</parameter>
+    <!--PlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters.-->
+    <parameter name="SubDetectorName" type="string">FTD</parameter>
+    <!--whether hits are 1D strip hits-->
+    <parameter name="IsStrip" type="bool">true</parameter>
+    <!--resolution in direction of u-->
+    <parameter name="ResolutionU" type="float">0.007</parameter>
+    <!--resolution in direction of v-->
+    <parameter name="ResolutionV" type="float">0.0</parameter>
+    <!--Name of the Input SimTrackerHit collection-->
+    <parameter name="SimTrackHitCollectionName" type="string" lcioInType="SimTrackerHit">FTD_STRIPCollection</parameter>
+    <!--Name of TrackerHit SimTrackHit relation collection-->
+    <parameter name="SimTrkHitRelCollection" type="string" lcioOutType="LCRelation">FTDStripTrackerHitRelations</parameter>
+    <!--Name of the TrackerHit output collection-->
+    <parameter name="TrackerHitCollectionName" type="string" lcioOutType="TrackerHitPlane">FTDStripTrackerHits</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+  </processor>
+  
+  <processor name="SETPlanarDigiProcessor" type="DDPlanarDigiProcessor" clone="false">
+    <!--Project hits onto the surface in case they are not yet on the surface (default: false)-->
+    <parameter name="ForceHitsOntoSurface" type="bool">true</parameter>
+    <!--PlanarDigiProcessor creates TrackerHits from SimTrackerHits, smearing them according to the input parameters.-->
+    <parameter name="SubDetectorName" type="string">SET</parameter>
+    <!--whether hits are 1D strip hits-->
+    <parameter name="IsStrip" type="bool">true</parameter>
+    <!--resolution in direction of u-->
+    <parameter name="ResolutionU" type="float">0.007</parameter>
+    <!--resolution in direction of v-->
+    <parameter name="ResolutionV" type="float">0</parameter>
+    <!--Name of the Input SimTrackerHit collection-->
+    <parameter name="SimTrackHitCollectionName" type="string" lcioInType="SimTrackerHit">SETCollection</parameter>
+    <!--Name of TrackerHit SimTrackHit relation collection-->
+    <parameter name="SimTrkHitRelCollection" type="string" lcioOutType="LCRelation">SETTrackerHitRelations</parameter>
+    <!--Name of the TrackerHit output collection-->
+    <parameter name="TrackerHitCollectionName" type="string" lcioOutType="TrackerHitPlane">SETTrackerHits</parameter>
+    <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
+    <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
+  </processor>
+  
+  
+  <!-- Write reconstruction output : REC, DST and PfoAnalysis -->
+  <processor name="MyLCIOOutputProcessor" type="LCIOOutputProcessor">
+    <!--   standard output: full reconstruction keep all collections -->
+    <parameter name="LCIOOutputFile" type="string" >
+      output.slcio
+    </parameter>
+    <parameter name="LCIOWriteMode" type="string" value="WRITE_NEW"/>
+  </processor>
+
+</marlin>
