@@ -45,7 +45,7 @@ namespace marlinreco_mt {
     double getZRes() const {return _zRes;}
     const LCVector3D &getHep3Vector() const {return _coord;}
     
-    static comparePhi( const VoxelTPC *const a, const VoxelTPC *const b )  { 
+    static bool comparePhi( const VoxelTPC *const a, const VoxelTPC *const b )  { 
       return ( a->getPhiIndex() < b->getPhiIndex() ) ; 
     } 
     static bool compareZ( const VoxelTPC *const a, const VoxelTPC *const b ) { 
